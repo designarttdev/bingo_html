@@ -51,6 +51,7 @@ class BingoGame {
         
         // Inicializar elementos da UI
         this.initUI();
+        this.initTheme();
         
         // Carregar dados salvos
         this.loadGame();
@@ -85,6 +86,18 @@ class BingoGame {
             if (e.key === 'Enter') {
                 this.addCardAuto();
             }
+        });
+    }
+
+    initTheme() {
+        const saved = localStorage.getItem('theme') || 'dark';
+        const toggleBtn = document.getElementById('toggle-theme');
+        document.body.classList.toggle('dark', saved === 'dark');
+        toggleBtn.textContent = saved === 'dark' ? 'Modo Claro' : 'Modo Escuro';
+        toggleBtn.addEventListener('click', () => {
+            const dark = document.body.classList.toggle('dark');
+            localStorage.setItem('theme', dark ? 'dark' : 'light');
+            toggleBtn.textContent = dark ? 'Modo Claro' : 'Modo Escuro';
         });
     }
 
@@ -175,6 +188,7 @@ class BingoGame {
 
     validateManualInputs(inputs) {
         const cardNumbers = Array(5).fill().map(() => Array(5).fill(0));
+        const used = new Set();
 
         for (const input of inputs) {
             const row = parseInt(input.dataset.row);
@@ -188,17 +202,10 @@ class BingoGame {
                 return { valid: false, message: `Por favor, informe números válidos entre 1 e ${this.maxNumber}.` };
             }
 
-            const minForCol = col * 15 + 1;
-            const maxForCol = minForCol + 14;
-            if (value < minForCol || value > maxForCol) {
-                return { valid: false, message: `O número ${value} não está no intervalo correto para a coluna ${col + 1}. Informe um número entre ${minForCol} e ${maxForCol}.` };
+            if (used.has(value)) {
+                return { valid: false, message: `O número ${value} está duplicado.` };
             }
-
-            for (let r = 0; r < 5; r++) {
-                if (r !== row && cardNumbers[r][col] === value) {
-                    return { valid: false, message: `O número ${value} está duplicado na coluna ${col + 1}.` };
-                }
-            }
+            used.add(value);
 
             cardNumbers[row][col] = value;
         }

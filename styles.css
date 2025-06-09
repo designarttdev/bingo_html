@@ -11,6 +11,11 @@ body {
     line-height: 1.6;
 }
 
+body.dark {
+    background-color: #121212;
+    color: #f5f5f5;
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -41,6 +46,11 @@ h2 {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+body.dark .config-panel {
+    background-color: #1e1e1e;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
 .config-item {
     display: flex;
     align-items: center;
@@ -65,6 +75,11 @@ h2 {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+body.dark .controls {
+    background-color: #1e1e1e;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
 .card-controls, .number-controls {
     display: flex;
     gap: 10px;
@@ -77,6 +92,12 @@ input {
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 1rem;
+}
+
+body.dark input {
+    background-color: #333;
+    border-color: #555;
+    color: #f5f5f5;
 }
 
 input[type="number"] {
@@ -144,6 +165,11 @@ input[type="number"] {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+body.dark .drawn-numbers-container {
+    background-color: #1e1e1e;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
 .drawn-numbers {
     display: flex;
     flex-wrap: wrap;
@@ -173,6 +199,11 @@ input[type="number"] {
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+body.dark .bingo-card {
+    background-color: #1e1e1e;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 }
 
 .card-header {
@@ -224,6 +255,20 @@ input[type="number"] {
     font-weight: bold;
 }
 
+body.dark .card-cell {
+    background-color: #333;
+}
+
+body.dark .card-cell.marked {
+    background-color: #e74c3c;
+    color: white;
+}
+
+body.dark .card-cell.free {
+    background-color: #2ecc71;
+    color: white;
+}
+
 .card-cell.marked {
     background-color: #e74c3c;
     color: white;
@@ -260,6 +305,10 @@ input[type="number"] {
     width: 90%;
     max-height: 90vh;
     overflow-y: auto;
+}
+
+body.dark .modal-content {
+    background-color: #1e1e1e;
 }
 
 .modal-form {
@@ -342,9 +391,17 @@ input[type="number"] {
     text-align: center;
 }
 
+body.dark .notification-content {
+    background-color: #1e1e1e;
+}
+
 .notification-content h2 {
     margin-bottom: 10px;
     color: #2c3e50;
+}
+
+body.dark .notification-content h2 {
+    color: #f5f5f5;
 }
 
 .notification-content p {
