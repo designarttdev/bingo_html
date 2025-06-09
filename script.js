@@ -72,7 +72,12 @@ class BingoGame {
         document.getElementById('save-config').addEventListener('click', () => this.saveConfig());
 
         // Definir valor inicial do tipo de bingo
-        document.getElementById('bingo-type').value = this.bingoType;
+        const bingoTypeSelect = document.getElementById('bingo-type');
+        bingoTypeSelect.value = this.bingoType;
+        bingoTypeSelect.addEventListener('change', () => {
+            this.bingoType = bingoTypeSelect.value;
+            this.saveGame();
+        });
         
         // Modal de cartela manual
         document.getElementById('save-manual-card').addEventListener('click', () => this.saveManualCard());
