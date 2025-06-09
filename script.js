@@ -49,6 +49,7 @@ class BingoGame {
         this.availableNumbers = Array.from({ length: this.maxNumber }, (_, i) => i + 1); // Números de 1 a 75
         this.editingCard = null;
         this.bingoType = 'line';
+        this.sortMode = 'history';
         
         // Inicializar elementos da UI
         this.initUI();
@@ -78,6 +79,17 @@ class BingoGame {
             this.bingoType = bingoTypeSelect.value;
             this.saveGame();
         });
+
+        // Ordenação dos números sorteados
+        const orderSelect = document.getElementById('numbers-order');
+        if (orderSelect) {
+            orderSelect.value = this.sortMode;
+            orderSelect.addEventListener('change', () => {
+                this.sortMode = orderSelect.value;
+                this.saveGame();
+                this.renderDrawnNumbers();
+            });
+        }
         
         // Modal de cartela manual
         document.getElementById('save-manual-card').addEventListener('click', () => this.saveManualCard());
@@ -94,6 +106,14 @@ class BingoGame {
         document.getElementById('card-id').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 this.addCardAuto();
+            }
+        });
+
+        const numbersContainer = document.getElementById('drawn-numbers');
+        numbersContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('drawn-number')) {
+                const index = parseInt(e.target.dataset.index);
+                this.editDrawnNumber(index);
             }
         });
     }
@@ -320,6 +340,37 @@ class BingoGame {
         this.checkBingo();
     }
 
+    editDrawnNumber(index) {
+        const oldNumber = this.drawnNumbers[index];
+        const input = prompt('Editar número sorteado', oldNumber);
+        if (input === null) return;
+        const newNumber = parseInt(input);
+        if (isNaN(newNumber) || newNumber < 1 || newNumber > this.maxNumber) {
+            this.showNotification('Erro', `Por favor, informe um número válido entre 1 e ${this.maxNumber}.`);
+            return;
+        }
+        if (this.drawnNumbers.includes(newNumber) && newNumber !== oldNumber) {
+            this.showNotification('Erro', `O número ${newNumber} já foi sorteado.`);
+            return;
+        }
+
+        this.drawnNumbers[index] = newNumber;
+
+        // Atualizar listas de disponíveis
+        if (!this.drawnNumbers.includes(oldNumber)) {
+            this.availableNumbers.push(oldNumber);
+        }
+        const idx = this.availableNumbers.indexOf(newNumber);
+        if (idx !== -1) {
+            this.availableNumbers.splice(idx, 1);
+        }
+        this.availableNumbers.sort((a, b) => a - b);
+
+        this.saveGame();
+        this.renderGame();
+        this.checkBingo();
+    }
+
     resetGame(configChanged = false) {
         if (!configChanged && !confirm('Deseja reiniciar o jogo? Isso manterá as cartelas, mas limpará os números sorteados.')) {
             return;
@@ -437,15 +488,17 @@ class BingoGame {
         const drawnNumbersContainer = document.getElementById('drawn-numbers');
         drawnNumbersContainer.innerHTML = '';
         
-        // Ordenar números para melhor visualização
-        const sortedNumbers = [...this.drawnNumbers].sort((a, b) => a - b);
-        
-        for (const number of sortedNumbers) {
+        const numbers = this.sortMode === 'asc'
+            ? [...this.drawnNumbers].sort((a, b) => a - b)
+            : this.drawnNumbers;
+
+        numbers.forEach((num, idx) => {
             const numberElement = document.createElement('div');
             numberElement.className = 'drawn-number';
-            numberElement.textContent = number;
+            numberElement.textContent = num;
+            numberElement.dataset.index = idx;
             drawnNumbersContainer.appendChild(numberElement);
-        }
+        });
     }
 
     renderCards() {
@@ -517,7 +570,8 @@ class BingoGame {
             cards: this.cards,
             drawnNumbers: this.drawnNumbers,
             maxNumber: this.maxNumber,
-            bingoType: this.bingoType
+            bingoType: this.bingoType,
+            sortMode: this.sortMode
         };
 
         localStorage.setItem('bingoGame', JSON.stringify(gameData));
@@ -542,9 +596,12 @@ class BingoGame {
 
                 this.maxNumber = gameData.maxNumber || this.maxNumber;
                 this.bingoType = gameData.bingoType || this.bingoType;
+                this.sortMode = gameData.sortMode || this.sortMode;
 
                 document.getElementById('max-number').value = this.maxNumber;
                 document.getElementById('bingo-type').value = this.bingoType;
+                const orderSelect = document.getElementById('numbers-order');
+                if (orderSelect) orderSelect.value = this.sortMode;
 
                 // Atualizar números disponíveis
                 this.availableNumbers = Array.from({ length: this.maxNumber }, (_, i) => i + 1)
