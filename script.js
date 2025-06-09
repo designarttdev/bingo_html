@@ -48,6 +48,7 @@ class BingoGame {
         this.maxNumber = 75; // Valor padrão
         this.availableNumbers = Array.from({ length: this.maxNumber }, (_, i) => i + 1); // Números de 1 a 75
         this.editingCard = null;
+        this.bingoType = 'line';
         
         // Inicializar elementos da UI
         this.initUI();
@@ -69,6 +70,14 @@ class BingoGame {
         document.getElementById('reset-game').addEventListener('click', () => this.resetGame());
         document.getElementById('notification-close').addEventListener('click', () => this.hideNotification());
         document.getElementById('save-config').addEventListener('click', () => this.saveConfig());
+
+        // Definir valor inicial do tipo de bingo
+        const bingoTypeSelect = document.getElementById('bingo-type');
+        bingoTypeSelect.value = this.bingoType;
+        bingoTypeSelect.addEventListener('change', () => {
+            this.bingoType = bingoTypeSelect.value;
+            this.saveGame();
+        });
         
         // Modal de cartela manual
         document.getElementById('save-manual-card').addEventListener('click', () => this.saveManualCard());
@@ -104,19 +113,22 @@ class BingoGame {
     saveConfig() {
         const maxNumberInput = document.getElementById('max-number');
         const newMaxNumber = parseInt(maxNumberInput.value);
-        
+        const bingoTypeSelect = document.getElementById('bingo-type');
+        this.bingoType = bingoTypeSelect.value;
+
         if (isNaN(newMaxNumber) || newMaxNumber < 25 || newMaxNumber > 99) {
             this.showNotification('Erro', 'Por favor, informe um número válido entre 25 e 99.');
             return;
         }
-        
-        // Atualizar o número máximo
-        this.maxNumber = newMaxNumber;
-        
-        // Reiniciar o jogo com o novo número máximo
-        this.resetGame(true);
-        
-        this.showNotification('Sucesso', `Número máximo alterado para ${newMaxNumber}.`);
+
+        if (newMaxNumber !== this.maxNumber) {
+            this.maxNumber = newMaxNumber;
+            this.resetGame(true);
+            this.showNotification('Sucesso', `Número máximo alterado para ${newMaxNumber}.`);
+        } else {
+            this.saveGame();
+            this.showNotification('Sucesso', 'Configurações atualizadas.');
+        }
     }
 
     addCardAuto() {
@@ -342,6 +354,13 @@ class BingoGame {
     }
 
     checkCardBingo(card) {
+        if (this.bingoType === 'full') {
+            if (this.checkFullCard(card)) {
+                return ['Cartela Cheia', 'Cheia'];
+            }
+            return null;
+        }
+
         // Verificar linhas horizontais
         for (let row = 0; row < 5; row++) {
             if (this.checkLine(card, row, 'horizontal')) {
@@ -365,8 +384,21 @@ class BingoGame {
         if (this.checkDiagonal(card, 'secundaria')) {
             return ['Diagonal', 'Secundária'];
         }
-        
+
         return null;
+    }
+
+    checkFullCard(card) {
+        for (let row = 0; row < 5; row++) {
+            for (let col = 0; col < 5; col++) {
+                if (row === 2 && col === 2) continue;
+                const number = card.numbers[row][col];
+                if (!this.drawnNumbers.includes(number)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     checkLine(card, index, type) {
@@ -483,9 +515,11 @@ class BingoGame {
     saveGame() {
         const gameData = {
             cards: this.cards,
-            drawnNumbers: this.drawnNumbers
+            drawnNumbers: this.drawnNumbers,
+            maxNumber: this.maxNumber,
+            bingoType: this.bingoType
         };
-        
+
         localStorage.setItem('bingoGame', JSON.stringify(gameData));
     }
 
@@ -502,12 +536,18 @@ class BingoGame {
                     card.numbers = cardData.numbers;
                     return card;
                 });
-                
+
                 // Restaurar números sorteados
                 this.drawnNumbers = gameData.drawnNumbers;
-                
+
+                this.maxNumber = gameData.maxNumber || this.maxNumber;
+                this.bingoType = gameData.bingoType || this.bingoType;
+
+                document.getElementById('max-number').value = this.maxNumber;
+                document.getElementById('bingo-type').value = this.bingoType;
+
                 // Atualizar números disponíveis
-                this.availableNumbers = Array.from({ length: 75 }, (_, i) => i + 1)
+                this.availableNumbers = Array.from({ length: this.maxNumber }, (_, i) => i + 1)
                     .filter(num => !this.drawnNumbers.includes(num));
                 
             } catch (error) {
