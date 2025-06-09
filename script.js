@@ -47,9 +47,12 @@ class BingoGame {
         this.drawnNumbers = [];
         this.maxNumber = 75; // Valor padrão
         this.availableNumbers = Array.from({ length: this.maxNumber }, (_, i) => i + 1); // Números de 1 a 75
+        this.editingCard = null;
+        this.bingoType = 'line';
         
         // Inicializar elementos da UI
         this.initUI();
+        this.initTheme();
         
         // Carregar dados salvos
         this.loadGame();
@@ -67,6 +70,9 @@ class BingoGame {
         document.getElementById('reset-game').addEventListener('click', () => this.resetGame());
         document.getElementById('notification-close').addEventListener('click', () => this.hideNotification());
         document.getElementById('save-config').addEventListener('click', () => this.saveConfig());
+
+        // Definir valor inicial do tipo de bingo
+        document.getElementById('bingo-type').value = this.bingoType;
         
         // Modal de cartela manual
         document.getElementById('save-manual-card').addEventListener('click', () => this.saveManualCard());
@@ -87,22 +93,37 @@ class BingoGame {
         });
     }
 
+    initTheme() {
+        const saved = localStorage.getItem('theme') || 'dark';
+        const toggleBtn = document.getElementById('toggle-theme');
+        document.body.classList.toggle('dark', saved === 'dark');
+        toggleBtn.textContent = saved === 'dark' ? 'Modo Claro' : 'Modo Escuro';
+        toggleBtn.addEventListener('click', () => {
+            const dark = document.body.classList.toggle('dark');
+            localStorage.setItem('theme', dark ? 'dark' : 'light');
+            toggleBtn.textContent = dark ? 'Modo Claro' : 'Modo Escuro';
+        });
+    }
+
     saveConfig() {
         const maxNumberInput = document.getElementById('max-number');
         const newMaxNumber = parseInt(maxNumberInput.value);
-        
+        const bingoTypeSelect = document.getElementById('bingo-type');
+        this.bingoType = bingoTypeSelect.value;
+
         if (isNaN(newMaxNumber) || newMaxNumber < 25 || newMaxNumber > 99) {
             this.showNotification('Erro', 'Por favor, informe um número válido entre 25 e 99.');
             return;
         }
-        
-        // Atualizar o número máximo
-        this.maxNumber = newMaxNumber;
-        
-        // Reiniciar o jogo com o novo número máximo
-        this.resetGame(true);
-        
-        this.showNotification('Sucesso', `Número máximo alterado para ${newMaxNumber}.`);
+
+        if (newMaxNumber !== this.maxNumber) {
+            this.maxNumber = newMaxNumber;
+            this.resetGame(true);
+            this.showNotification('Sucesso', `Número máximo alterado para ${newMaxNumber}.`);
+        } else {
+            this.saveGame();
+            this.showNotification('Sucesso', 'Configurações atualizadas.');
+        }
     }
 
     addCardAuto() {
@@ -132,107 +153,101 @@ class BingoGame {
         this.renderCards();
     }
 
-    showManualCardModal() {
+    showManualCardModal(card = null) {
         const modal = document.getElementById('manual-card-modal');
         const cardIdInput = document.getElementById('card-id');
         const manualCardIdInput = document.getElementById('manual-card-id');
-        
-        // Preencher o ID da cartela se já estiver informado no campo principal
-        manualCardIdInput.value = cardIdInput.value.trim();
-        
-        // Limpar todos os inputs do modal
+        const title = document.getElementById('manual-card-title');
+
+        this.editingCard = card;
+
         const inputs = modal.querySelectorAll('.manual-input');
-        inputs.forEach(input => {
-            input.value = '';
-        });
-        
-        // Mostrar o modal
+
+        if (card) {
+            // Preencher com dados existentes
+            title.textContent = 'Editar Cartela';
+            manualCardIdInput.value = card.id;
+            manualCardIdInput.disabled = true;
+
+            inputs.forEach(input => {
+                const row = parseInt(input.dataset.row);
+                const col = parseInt(input.dataset.col);
+                if (row === 2 && col === 2) return;
+                input.value = card.numbers[row][col];
+            });
+        } else {
+            title.textContent = 'Adicionar Cartela Manual';
+            manualCardIdInput.disabled = false;
+            manualCardIdInput.value = cardIdInput.value.trim();
+            inputs.forEach(input => {
+                input.value = '';
+            });
+        }
+
         modal.classList.remove('hidden');
     }
 
     hideManualCardModal() {
         const modal = document.getElementById('manual-card-modal');
         modal.classList.add('hidden');
+        this.editingCard = null;
+    }
+
+    validateManualInputs(inputs) {
+        const cardNumbers = Array(5).fill().map(() => Array(5).fill(0));
+        const used = new Set();
+
+        for (const input of inputs) {
+            const row = parseInt(input.dataset.row);
+            const col = parseInt(input.dataset.col);
+
+            if (row === 2 && col === 2) continue;
+
+            const value = parseInt(input.value);
+
+            if (isNaN(value) || value < 1 || value > this.maxNumber) {
+                return { valid: false, message: `Por favor, informe números válidos entre 1 e ${this.maxNumber}.` };
+            }
+
+            if (used.has(value)) {
+                return { valid: false, message: `O número ${value} está duplicado.` };
+            }
+            used.add(value);
+
+            cardNumbers[row][col] = value;
+        }
+
+        cardNumbers[2][2] = 0;
+        return { valid: true, numbers: cardNumbers };
     }
 
     saveManualCard() {
         const manualCardIdInput = document.getElementById('manual-card-id');
         const cardId = manualCardIdInput.value.trim();
-        
+
         if (!cardId) {
             this.showNotification('Erro', 'Por favor, informe um ID para a cartela.');
             return;
         }
-        
-        // Verificar se já existe uma cartela com este ID
-        if (this.cards.some(card => card.id === cardId)) {
+
+        if (!this.editingCard && this.cards.some(card => card.id === cardId)) {
             this.showNotification('Erro', `Já existe uma cartela com o ID "${cardId}".`);
             return;
         }
-        
-        // Criar matriz 5x5 para os números da cartela
-        const cardNumbers = Array(5).fill().map(() => Array(5).fill(0));
-        
-        // Coletar os números informados
+
         const inputs = document.querySelectorAll('.manual-input');
-        let isValid = true;
-        let errorMessage = '';
-        
-        // Verificar se todos os campos foram preenchidos (exceto o centro)
-        for (const input of inputs) {
-            const row = parseInt(input.dataset.row);
-            const col = parseInt(input.dataset.col);
-            
-            // Pular o centro (já é FREE)
-            if (row === 2 && col === 2) continue;
-            
-            const value = parseInt(input.value);
-            
-            if (isNaN(value) || value < 1 || value > this.maxNumber) {
-                isValid = false;
-                errorMessage = `Por favor, informe números válidos entre 1 e ${this.maxNumber}.`;
-                break;
-            }
-            
-            // Verificar se o número está no intervalo correto para a coluna
-            const minForCol = col * 15 + 1;
-            const maxForCol = minForCol + 14;
-            
-            if (value < minForCol || value > maxForCol) {
-                isValid = false;
-                errorMessage = `O número ${value} não está no intervalo correto para a coluna ${col + 1}.`;
-                break;
-            }
-            
-            // Verificar se o número já foi usado na mesma coluna
-            let isDuplicate = false;
-            for (let r = 0; r < 5; r++) {
-                if (r !== row && cardNumbers[r][col] === value) {
-                    isDuplicate = true;
-                    break;
-                }
-            }
-            
-            if (isDuplicate) {
-                isValid = false;
-                errorMessage = `O número ${value} está duplicado na coluna ${col + 1}.`;
-                break;
-            }
-            
-            cardNumbers[row][col] = value;
-        }
-        
-        if (!isValid) {
-            this.showNotification('Erro', errorMessage);
+        const validation = this.validateManualInputs(inputs);
+        if (!validation.valid) {
+            this.showNotification('Erro', validation.message);
             return;
         }
-        
-        // Definir o espaço livre no centro
-        cardNumbers[2][2] = 0;
-        
-        // Criar nova cartela com os números informados
-        const card = new BingoCard(cardId, cardNumbers);
-        this.cards.push(card);
+
+        if (this.editingCard) {
+            this.editingCard.numbers = validation.numbers;
+        } else {
+            const card = new BingoCard(cardId, validation.numbers);
+            this.cards.push(card);
+        }
         
         // Fechar o modal
         this.hideManualCardModal();
@@ -313,6 +328,15 @@ class BingoGame {
         this.renderGame();
     }
 
+    deleteCard(cardId) {
+        const index = this.cards.findIndex(c => c.id === cardId);
+        if (index !== -1 && confirm(`Excluir cartela #${cardId}?`)) {
+            this.cards.splice(index, 1);
+            this.saveGame();
+            this.renderCards();
+        }
+    }
+
     checkBingo() {
         for (const card of this.cards) {
             const result = this.checkCardBingo(card);
@@ -325,6 +349,13 @@ class BingoGame {
     }
 
     checkCardBingo(card) {
+        if (this.bingoType === 'full') {
+            if (this.checkFullCard(card)) {
+                return ['Cartela Cheia', 'Cheia'];
+            }
+            return null;
+        }
+
         // Verificar linhas horizontais
         for (let row = 0; row < 5; row++) {
             if (this.checkLine(card, row, 'horizontal')) {
@@ -348,8 +379,21 @@ class BingoGame {
         if (this.checkDiagonal(card, 'secundaria')) {
             return ['Diagonal', 'Secundária'];
         }
-        
+
         return null;
+    }
+
+    checkFullCard(card) {
+        for (let row = 0; row < 5; row++) {
+            for (let col = 0; col < 5; col++) {
+                if (row === 2 && col === 2) continue;
+                const number = card.numbers[row][col];
+                if (!this.drawnNumbers.includes(number)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     checkLine(card, index, type) {
@@ -417,6 +461,11 @@ class BingoGame {
         // Definir ID da cartela
         cardElement.dataset.cardId = card.id;
         cardElement.querySelector('.card-id').textContent = card.id;
+
+        const editBtn = cardElement.querySelector('.edit-card');
+        const deleteBtn = cardElement.querySelector('.delete-card');
+        editBtn.addEventListener('click', () => this.showManualCardModal(card));
+        deleteBtn.addEventListener('click', () => this.deleteCard(card.id));
         
         // Preencher os números
         for (let row = 0; row < 5; row++) {
@@ -461,9 +510,11 @@ class BingoGame {
     saveGame() {
         const gameData = {
             cards: this.cards,
-            drawnNumbers: this.drawnNumbers
+            drawnNumbers: this.drawnNumbers,
+            maxNumber: this.maxNumber,
+            bingoType: this.bingoType
         };
-        
+
         localStorage.setItem('bingoGame', JSON.stringify(gameData));
     }
 
@@ -480,12 +531,18 @@ class BingoGame {
                     card.numbers = cardData.numbers;
                     return card;
                 });
-                
+
                 // Restaurar números sorteados
                 this.drawnNumbers = gameData.drawnNumbers;
-                
+
+                this.maxNumber = gameData.maxNumber || this.maxNumber;
+                this.bingoType = gameData.bingoType || this.bingoType;
+
+                document.getElementById('max-number').value = this.maxNumber;
+                document.getElementById('bingo-type').value = this.bingoType;
+
                 // Atualizar números disponíveis
-                this.availableNumbers = Array.from({ length: 75 }, (_, i) => i + 1)
+                this.availableNumbers = Array.from({ length: this.maxNumber }, (_, i) => i + 1)
                     .filter(num => !this.drawnNumbers.includes(num));
                 
             } catch (error) {
