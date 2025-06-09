@@ -47,6 +47,7 @@ class BingoGame {
         this.drawnNumbers = [];
         this.maxNumber = 75; // Valor padrão
         this.availableNumbers = Array.from({ length: this.maxNumber }, (_, i) => i + 1); // Números de 1 a 75
+        this.editingCard = null;
         
         // Inicializar elementos da UI
         this.initUI();
@@ -132,107 +133,107 @@ class BingoGame {
         this.renderCards();
     }
 
-    showManualCardModal() {
+    showManualCardModal(card = null) {
         const modal = document.getElementById('manual-card-modal');
         const cardIdInput = document.getElementById('card-id');
         const manualCardIdInput = document.getElementById('manual-card-id');
-        
-        // Preencher o ID da cartela se já estiver informado no campo principal
-        manualCardIdInput.value = cardIdInput.value.trim();
-        
-        // Limpar todos os inputs do modal
+        const title = document.getElementById('manual-card-title');
+
+        this.editingCard = card;
+
         const inputs = modal.querySelectorAll('.manual-input');
-        inputs.forEach(input => {
-            input.value = '';
-        });
-        
-        // Mostrar o modal
+
+        if (card) {
+            // Preencher com dados existentes
+            title.textContent = 'Editar Cartela';
+            manualCardIdInput.value = card.id;
+            manualCardIdInput.disabled = true;
+
+            inputs.forEach(input => {
+                const row = parseInt(input.dataset.row);
+                const col = parseInt(input.dataset.col);
+                if (row === 2 && col === 2) return;
+                input.value = card.numbers[row][col];
+            });
+        } else {
+            title.textContent = 'Adicionar Cartela Manual';
+            manualCardIdInput.disabled = false;
+            manualCardIdInput.value = cardIdInput.value.trim();
+            inputs.forEach(input => {
+                input.value = '';
+            });
+        }
+
         modal.classList.remove('hidden');
     }
 
     hideManualCardModal() {
         const modal = document.getElementById('manual-card-modal');
         modal.classList.add('hidden');
+        this.editingCard = null;
+    }
+
+    validateManualInputs(inputs) {
+        const cardNumbers = Array(5).fill().map(() => Array(5).fill(0));
+
+        for (const input of inputs) {
+            const row = parseInt(input.dataset.row);
+            const col = parseInt(input.dataset.col);
+
+            if (row === 2 && col === 2) continue;
+
+            const value = parseInt(input.value);
+
+            if (isNaN(value) || value < 1 || value > this.maxNumber) {
+                return { valid: false, message: `Por favor, informe números válidos entre 1 e ${this.maxNumber}.` };
+            }
+
+            const minForCol = col * 15 + 1;
+            const maxForCol = minForCol + 14;
+            if (value < minForCol || value > maxForCol) {
+                return { valid: false, message: `O número ${value} não está no intervalo correto para a coluna ${col + 1}. Informe um número entre ${minForCol} e ${maxForCol}.` };
+            }
+
+            for (let r = 0; r < 5; r++) {
+                if (r !== row && cardNumbers[r][col] === value) {
+                    return { valid: false, message: `O número ${value} está duplicado na coluna ${col + 1}.` };
+                }
+            }
+
+            cardNumbers[row][col] = value;
+        }
+
+        cardNumbers[2][2] = 0;
+        return { valid: true, numbers: cardNumbers };
     }
 
     saveManualCard() {
         const manualCardIdInput = document.getElementById('manual-card-id');
         const cardId = manualCardIdInput.value.trim();
-        
+
         if (!cardId) {
             this.showNotification('Erro', 'Por favor, informe um ID para a cartela.');
             return;
         }
-        
-        // Verificar se já existe uma cartela com este ID
-        if (this.cards.some(card => card.id === cardId)) {
+
+        if (!this.editingCard && this.cards.some(card => card.id === cardId)) {
             this.showNotification('Erro', `Já existe uma cartela com o ID "${cardId}".`);
             return;
         }
-        
-        // Criar matriz 5x5 para os números da cartela
-        const cardNumbers = Array(5).fill().map(() => Array(5).fill(0));
-        
-        // Coletar os números informados
+
         const inputs = document.querySelectorAll('.manual-input');
-        let isValid = true;
-        let errorMessage = '';
-        
-        // Verificar se todos os campos foram preenchidos (exceto o centro)
-        for (const input of inputs) {
-            const row = parseInt(input.dataset.row);
-            const col = parseInt(input.dataset.col);
-            
-            // Pular o centro (já é FREE)
-            if (row === 2 && col === 2) continue;
-            
-            const value = parseInt(input.value);
-            
-            if (isNaN(value) || value < 1 || value > this.maxNumber) {
-                isValid = false;
-                errorMessage = `Por favor, informe números válidos entre 1 e ${this.maxNumber}.`;
-                break;
-            }
-            
-            // Verificar se o número está no intervalo correto para a coluna
-            const minForCol = col * 15 + 1;
-            const maxForCol = minForCol + 14;
-            
-            if (value < minForCol || value > maxForCol) {
-                isValid = false;
-                errorMessage = `O número ${value} não está no intervalo correto para a coluna ${col + 1}.`;
-                break;
-            }
-            
-            // Verificar se o número já foi usado na mesma coluna
-            let isDuplicate = false;
-            for (let r = 0; r < 5; r++) {
-                if (r !== row && cardNumbers[r][col] === value) {
-                    isDuplicate = true;
-                    break;
-                }
-            }
-            
-            if (isDuplicate) {
-                isValid = false;
-                errorMessage = `O número ${value} está duplicado na coluna ${col + 1}.`;
-                break;
-            }
-            
-            cardNumbers[row][col] = value;
-        }
-        
-        if (!isValid) {
-            this.showNotification('Erro', errorMessage);
+        const validation = this.validateManualInputs(inputs);
+        if (!validation.valid) {
+            this.showNotification('Erro', validation.message);
             return;
         }
-        
-        // Definir o espaço livre no centro
-        cardNumbers[2][2] = 0;
-        
-        // Criar nova cartela com os números informados
-        const card = new BingoCard(cardId, cardNumbers);
-        this.cards.push(card);
+
+        if (this.editingCard) {
+            this.editingCard.numbers = validation.numbers;
+        } else {
+            const card = new BingoCard(cardId, validation.numbers);
+            this.cards.push(card);
+        }
         
         // Fechar o modal
         this.hideManualCardModal();
@@ -311,6 +312,15 @@ class BingoGame {
         // Salvar e renderizar
         this.saveGame();
         this.renderGame();
+    }
+
+    deleteCard(cardId) {
+        const index = this.cards.findIndex(c => c.id === cardId);
+        if (index !== -1 && confirm(`Excluir cartela #${cardId}?`)) {
+            this.cards.splice(index, 1);
+            this.saveGame();
+            this.renderCards();
+        }
     }
 
     checkBingo() {
@@ -417,6 +427,11 @@ class BingoGame {
         // Definir ID da cartela
         cardElement.dataset.cardId = card.id;
         cardElement.querySelector('.card-id').textContent = card.id;
+
+        const editBtn = cardElement.querySelector('.edit-card');
+        const deleteBtn = cardElement.querySelector('.delete-card');
+        editBtn.addEventListener('click', () => this.showManualCardModal(card));
+        deleteBtn.addEventListener('click', () => this.deleteCard(card.id));
         
         // Preencher os números
         for (let row = 0; row < 5; row++) {

@@ -52,6 +52,10 @@
         <div class="bingo-card" data-card-id="">
             <div class="card-header">
                 <h3>Cartela #<span class="card-id"></span></h3>
+                <div class="card-actions">
+                    <button class="btn secondary edit-card">Editar</button>
+                    <button class="btn danger delete-card">Excluir</button>
+                </div>
             </div>
             <div class="card-grid">
                 <div class="card-header-row">
@@ -103,7 +107,7 @@
     <!-- Modal para entrada manual de números da cartela -->
     <div id="manual-card-modal" class="modal hidden">
         <div class="modal-content">
-            <h2>Adicionar Cartela Manual</h2>
+            <h2 id="manual-card-title">Adicionar Cartela Manual</h2>
             <p>Informe o ID da cartela e os números para cada posição.</p>
             
             <div class="modal-form">
