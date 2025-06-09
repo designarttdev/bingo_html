@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicativo de Bingo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>BINGO</h1>
+        </header>
+
+        <div class="controls">
+            <div class="card-controls">
+                <input type="text" id="card-id" placeholder="Número da cartela">
+                <button id="add-card" class="btn primary">Adicionar Cartela</button>
+            </div>
+            <div class="number-controls">
+                <input type="number" id="drawn-number" min="1" max="75" placeholder="Número sorteado">
+                <button id="mark-number" class="btn secondary">Marcar Número</button>
+                <button id="draw-random" class="btn accent">Sortear Número</button>
+            </div>
+            <button id="reset-game" class="btn danger">Reiniciar Jogo</button>
+        </div>
+
+        <div class="drawn-numbers-container">
+            <h2>Números Sorteados</h2>
+            <div id="drawn-numbers" class="drawn-numbers"></div>
+        </div>
+
+        <div id="cards-container" class="cards-container">
+            <!-- As cartelas de bingo serão adicionadas aqui dinamicamente -->
+        </div>
+    </div>
+
+    <!-- Template para cartela de bingo -->
+    <template id="card-template">
+        <div class="bingo-card" data-card-id="">
+            <div class="card-header">
+                <h3>Cartela #<span class="card-id"></span></h3>
+            </div>
+            <div class="card-grid">
+                <div class="card-header-row">
+                    <div class="header-cell">B</div>
+                    <div class="header-cell">I</div>
+                    <div class="header-cell">N</div>
+                    <div class="header-cell">G</div>
+                    <div class="header-cell">O</div>
+                </div>
+                <div class="card-row" data-row="0">
+                    <div class="card-cell" data-col="0"></div>
+                    <div class="card-cell" data-col="1"></div>
+                    <div class="card-cell" data-col="2"></div>
+                    <div class="card-cell" data-col="3"></div>
+                    <div class="card-cell" data-col="4"></div>
+                </div>
+                <div class="card-row" data-row="1">
+                    <div class="card-cell" data-col="0"></div>
+                    <div class="card-cell" data-col="1"></div>
+                    <div class="card-cell" data-col="2"></div>
+                    <div class="card-cell" data-col="3"></div>
+                    <div class="card-cell" data-col="4"></div>
+                </div>
+                <div class="card-row" data-row="2">
+                    <div class="card-cell" data-col="0"></div>
+                    <div class="card-cell" data-col="1"></div>
+                    <div class="card-cell" data-col="2">FREE</div>
+                    <div class="card-cell" data-col="3"></div>
+                    <div class="card-cell" data-col="4"></div>
+                </div>
+                <div class="card-row" data-row="3">
+                    <div class="card-cell" data-col="0"></div>
+                    <div class="card-cell" data-col="1"></div>
+                    <div class="card-cell" data-col="2"></div>
+                    <div class="card-cell" data-col="3"></div>
+                    <div class="card-cell" data-col="4"></div>
+                </div>
+                <div class="card-row" data-row="4">
+                    <div class="card-cell" data-col="0"></div>
+                    <div class="card-cell" data-col="1"></div>
+                    <div class="card-cell" data-col="2"></div>
+                    <div class="card-cell" data-col="3"></div>
+                    <div class="card-cell" data-col="4"></div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <div id="notification" class="notification hidden">
+        <div class="notification-content">
+            <h2 id="notification-title"></h2>
+            <p id="notification-message"></p>
+            <button id="notification-close" class="btn primary">OK</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
