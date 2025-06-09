@@ -13,13 +13,24 @@
             <h1>BINGO</h1>
         </header>
 
+        <div class="config-panel">
+            <h2>Configurações</h2>
+            <div class="config-item">
+                <label for="max-number">Número máximo do sorteio:</label>
+                <input type="number" id="max-number" min="25" max="99" value="75">
+                <button id="save-config" class="btn primary">Salvar</button>
+            </div>
+            <p class="config-info">Nota: Alterar o número máximo reiniciará o jogo atual.</p>
+        </div>
+
         <div class="controls">
             <div class="card-controls">
                 <input type="text" id="card-id" placeholder="Número da cartela">
-                <button id="add-card" class="btn primary">Adicionar Cartela</button>
+                <button id="add-card-auto" class="btn primary">Adicionar Cartela Automática</button>
+                <button id="add-card-manual" class="btn secondary">Adicionar Cartela Manual</button>
             </div>
             <div class="number-controls">
-                <input type="number" id="drawn-number" min="1" max="75" placeholder="Número sorteado">
+                <input type="number" id="drawn-number" min="1" max="99" placeholder="Número sorteado">
                 <button id="mark-number" class="btn secondary">Marcar Número</button>
                 <button id="draw-random" class="btn accent">Sortear Número</button>
             </div>
@@ -88,6 +99,71 @@
             </div>
         </div>
     </template>
+
+    <!-- Modal para entrada manual de números da cartela -->
+    <div id="manual-card-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Adicionar Cartela Manual</h2>
+            <p>Informe o ID da cartela e os números para cada posição.</p>
+            
+            <div class="modal-form">
+                <div class="form-group">
+                    <label for="manual-card-id">ID da Cartela:</label>
+                    <input type="text" id="manual-card-id" required>
+                </div>
+                
+                <div class="manual-card-grid">
+                    <!-- Cabeçalho BINGO -->
+                    <div class="manual-header">B</div>
+                    <div class="manual-header">I</div>
+                    <div class="manual-header">N</div>
+                    <div class="manual-header">G</div>
+                    <div class="manual-header">O</div>
+                    
+                    <!-- Inputs para os números -->
+                    <!-- Linha 1 -->
+                    <input type="number" class="manual-input" data-row="0" data-col="0" min="1" max="99">
+                    <input type="number" class="manual-input" data-row="0" data-col="1" min="1" max="99">
+                    <input type="number" class="manual-input" data-row="0" data-col="2" min="1" max="99">
+                    <input type="number" class="manual-input" data-row="0" data-col="3" min="1" max="99">
+                    <input type="number" class="manual-input" data-row="0" data-col="4" min="1" max="99">
+                    
+                    <!-- Linha 2 -->
+                    <input type="number" class="manual-input" data-row="1" data-col="0" min="1" max="99">
+                    <input type="number" class="manual-input" data-row="1" data-col="1" min="1" max="99">
+                    <input type="number" class="manual-input" data-row="1" data-col="2" min="1" max="99">
+                    <input type="number" class="manual-input" data-row="1" data-col="3" min="1" max="99">
+                    <input type="number" class="manual-input" data-row="1" data-col="4" min="1" max="99">
+                    
+                    <!-- Linha 3 -->
+                    <input type="number" class="manual-input" data-row="2" data-col="0" min="1" max="99">
+                    <input type="number" class="manual-input" data-row="2" data-col="1" min="1" max="99">
+                    <div class="manual-free">FREE</div>
+                    <input type="number" class="manual-input" data-row="2" data-col="3" min="1" max="99">
+                    <input type="number" class="manual-input" data-row="2" data-col="4" min="1" max="99">
+                    
+                    <!-- Linha 4 -->
+                    <input type="number" class="manual-input" data-row="3" data-col="0" min="1" max="99">
+                    <input type="number" class="manual-input" data-row="3" data-col="1" min="1" max="99">
+                    <input type="number" class="manual-input" data-row="3" data-col="2" min="1" max="99">
+                    <input type="number" class="manual-input" data-row="3" data-col="3" min="1" max="99">
+                    <input type="number" class="manual-input" data-row="3" data-col="4" min="1" max="99">
+                    
+                    <!-- Linha 5 -->
+                    <input type="number" class="manual-input" data-row="4" data-col="0" min="1" max="99">
+                    <input type="number" class="manual-input" data-row="4" data-col="1" min="1" max="99">
+                    <input type="number" class="manual-input" data-row="4" data-col="2" min="1" max="99">
+                    <input type="number" class="manual-input" data-row="4" data-col="3" min="1" max="99">
+                    <input type="number" class="manual-input" data-row="4" data-col="4" min="1" max="99">
+                </div>
+                
+                <div class="modal-buttons">
+                    <button id="save-manual-card" class="btn primary">Salvar Cartela</button>
+                    <button id="cancel-manual-card" class="btn danger">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div id="notification" class="notification hidden">
         <div class="notification-content">
