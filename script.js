@@ -488,15 +488,22 @@ class BingoGame {
         const drawnNumbersContainer = document.getElementById('drawn-numbers');
         drawnNumbersContainer.innerHTML = '';
         
-        const numbers = this.sortMode === 'asc'
-            ? [...this.drawnNumbers].sort((a, b) => a - b)
-            : this.drawnNumbers;
+        let numbersWithIndex;
+        if (this.sortMode === 'asc') {
+            // Criar array com números e seus índices originais
+            numbersWithIndex = this.drawnNumbers.map((num, idx) => ({ num, originalIndex: idx }));
+            // Ordenar mantendo referência ao índice original
+            numbersWithIndex.sort((a, b) => a.num - b.num);
+        } else {
+            // No modo histórico, usar a ordem original
+            numbersWithIndex = this.drawnNumbers.map((num, idx) => ({ num, originalIndex: idx }));
+        }
 
-        numbers.forEach((num, idx) => {
+        numbersWithIndex.forEach(({ num, originalIndex }) => {
             const numberElement = document.createElement('div');
             numberElement.className = 'drawn-number';
             numberElement.textContent = num;
-            numberElement.dataset.index = idx;
+            numberElement.dataset.index = originalIndex; // Usar o índice original
             drawnNumbersContainer.appendChild(numberElement);
         });
     }
