@@ -130,6 +130,29 @@ class BingoGame {
                 this.saveEditedNumber();
             }
         });
+        
+        // Botão de confirmação do número máximo (desktop)
+        document.getElementById('confirm-max-number').addEventListener('click', () => {
+            this.confirmMaxNumber();
+        });
+        
+        // Botão de confirmação do número máximo (mobile)
+        document.getElementById('mobile-confirm-max-number').addEventListener('click', () => {
+            this.confirmMaxNumberMobile();
+        });
+        
+        // Permitir pressionar Enter nos campos de número máximo
+        document.getElementById('max-number').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.confirmMaxNumber();
+            }
+        });
+        
+        document.getElementById('mobile-max-number').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.confirmMaxNumberMobile();
+            }
+        });
 
         const numbersContainer = document.getElementById('drawn-numbers');
         numbersContainer.addEventListener('click', (e) => {
@@ -197,32 +220,64 @@ class BingoGame {
         document.getElementById('config-modal').style.display = 'none';
     }
     
-    saveMobileConfig() {
-        const maxNumberInput = document.getElementById('mobile-max-number');
+    // Confirmar número máximo (desktop) - salva imediatamente sem fechar pop-up
+    confirmMaxNumber() {
+        const maxNumberInput = document.getElementById('max-number');
         const newMaxNumber = parseInt(maxNumberInput.value);
-        const bingoTypeSelect = document.getElementById('mobile-bingo-type');
-        this.bingoType = bingoTypeSelect.value;
-
+        
         if (isNaN(newMaxNumber) || newMaxNumber < 25 || newMaxNumber > 99) {
             this.showNotification('Erro', 'Por favor, informe um número válido entre 25 e 99.');
             return;
         }
-
+        
         if (newMaxNumber !== this.maxNumber) {
             this.maxNumber = newMaxNumber;
-            // Sincronizar com o desktop
-            document.getElementById('max-number').value = newMaxNumber;
-            document.getElementById('bingo-type').value = this.bingoType;
+            // Sincronizar com o input mobile
+            document.getElementById('mobile-max-number').value = newMaxNumber;
             this.resetGame(true);
-            this.showNotification('Sucesso', `Número máximo alterado para ${newMaxNumber}.`);
+            this.showNotification('Sucesso', `Número máximo alterado para ${newMaxNumber}. Jogo reiniciado.`);
         } else {
-            // Sincronizar com o desktop
-            document.getElementById('max-number').value = newMaxNumber;
-            document.getElementById('bingo-type').value = this.bingoType;
-            this.saveGame();
-            this.showNotification('Sucesso', 'Configurações atualizadas.');
+            this.showNotification('Info', 'Número máximo confirmado (sem alterações).');
         }
         
+        this.saveGame();
+    }
+    
+    // Confirmar número máximo (mobile) - salva imediatamente sem fechar pop-up
+    confirmMaxNumberMobile() {
+        const maxNumberInput = document.getElementById('mobile-max-number');
+        const newMaxNumber = parseInt(maxNumberInput.value);
+        
+        if (isNaN(newMaxNumber) || newMaxNumber < 25 || newMaxNumber > 99) {
+            this.showNotification('Erro', 'Por favor, informe um número válido entre 25 e 99.');
+            return;
+        }
+        
+        if (newMaxNumber !== this.maxNumber) {
+            this.maxNumber = newMaxNumber;
+            // Sincronizar com o input desktop
+            document.getElementById('max-number').value = newMaxNumber;
+            this.resetGame(true);
+            this.showNotification('Sucesso', `Número máximo alterado para ${newMaxNumber}. Jogo reiniciado.`);
+        } else {
+            this.showNotification('Info', 'Número máximo confirmado (sem alterações).');
+        }
+        
+        this.saveGame();
+    }
+
+    saveMobileConfig() {
+        const bingoTypeSelect = document.getElementById('mobile-bingo-type');
+        const newBingoType = bingoTypeSelect.value;
+        
+        if (newBingoType !== this.bingoType) {
+            this.bingoType = newBingoType;
+            // Sincronizar com o select desktop
+            document.getElementById('bingo-type').value = newBingoType;
+            this.checkBingo();
+        }
+        
+        this.saveGame();
         this.hideConfigModal();
     }
     
@@ -307,6 +362,23 @@ class BingoGame {
         }
 
         modal.classList.remove('hidden');
+        
+        // Adicionar event listeners para posicionar cursor no final dos inputs
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                // Para inputs do tipo 'number', apenas focar no campo
+                // setSelectionRange não é suportado em inputs do tipo 'number'
+                if (this.type === 'number') {
+                    // Apenas garantir que o campo está focado
+                    this.focus();
+                } else {
+                    // Para outros tipos de input, posicionar cursor no final
+                    setTimeout(() => {
+                        this.setSelectionRange(this.value.length, this.value.length);
+                    }, 0);
+                }
+            });
+        });
     }
 
     hideManualCardModal() {
@@ -508,11 +580,26 @@ class BingoGame {
     }
 
     deleteCard(cardId) {
-        const index = this.cards.findIndex(c => c.id === cardId);
-        if (index !== -1 && confirm(`Excluir cartela #${cardId}?`)) {
-            this.cards.splice(index, 1);
-            this.saveGame();
-            this.renderCards();
+        // Converter cardId para número para garantir comparação correta
+        const numericCardId = parseInt(cardId);
+        const index = this.cards.findIndex(c => parseInt(c.id) === numericCardId);
+        
+        if (index !== -1) {
+            if (confirm(`Excluir cartela #${cardId}?`)) {
+                // Remover a cartela do array
+                this.cards.splice(index, 1);
+                
+                // Salvar o estado do jogo
+                this.saveGame();
+                
+                // Atualizar a interface
+                this.renderCards();
+                
+                // Mostrar notificação de sucesso
+                this.showNotification('Sucesso', `Cartela #${cardId} excluída com sucesso!`);
+            }
+        } else {
+            this.showNotification('Erro', 'Cartela não encontrada!');
         }
     }
 
@@ -652,8 +739,22 @@ class BingoGame {
 
         const editBtn = cardElement.querySelector('.edit-card');
         const deleteBtn = cardElement.querySelector('.delete-card');
-        editBtn.addEventListener('click', () => this.showManualCardModal(card));
-        deleteBtn.addEventListener('click', () => this.deleteCard(card.id));
+        
+        // Usar onclick diretamente para garantir que funcione
+        editBtn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.showManualCardModal(card);
+            return false;
+        };
+        
+        // Usar onclick diretamente para garantir que funcione
+        deleteBtn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.deleteCard(card.id);
+            return false;
+        };
         
         // Preencher os números
         for (let row = 0; row < 5; row++) {
