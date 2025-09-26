@@ -76,6 +76,7 @@ class BingoGame {
         document.getElementById('open-config-mobile').addEventListener('click', () => this.showConfigModal());
         document.getElementById('close-config-modal').addEventListener('click', () => this.hideConfigModal());
         document.getElementById('save-mobile-config').addEventListener('click', () => this.saveMobileConfig());
+        document.getElementById('mobile-confirm-max-number').addEventListener('click', () => this.confirmMaxNumberMobile());
         
         // Botões mobile duplicados
         document.getElementById('mobile-add-card-auto').addEventListener('click', () => this.addCardAutoMobile());
