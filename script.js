@@ -72,31 +72,24 @@ class BingoGame {
         document.getElementById('notification-close').addEventListener('click', () => this.hideNotification());
         document.getElementById('save-config').addEventListener('click', () => this.saveConfig());
         
-        // Botões mobile (modal antigo) - apenas os que existem
-        document.getElementById('open-config-mobile').addEventListener('click', () => this.showMobileConfigPanel());
+        // Botões mobile (modal centralizado)
+        document.getElementById('open-config-mobile').addEventListener('click', () => this.showConfigModal());
 
-        // Botões do painel sticky mobile
-        document.getElementById('close-mobile-config').addEventListener('click', () => this.hideMobileConfigPanel());
-        document.getElementById('mobile-confirm-max-number-sticky').addEventListener('click', () => this.confirmMaxNumberMobileSticky());
-        document.getElementById('mobile-bingo-type-sticky').addEventListener('change', (e) => {
+        // Botões do modal de configurações
+        document.getElementById('close-config-modal-btn').addEventListener('click', () => this.hideConfigModal());
+        document.getElementById('modal-confirm-max-number').addEventListener('click', () => this.confirmMaxNumberModal());
+        document.getElementById('modal-bingo-type').addEventListener('change', (e) => {
             this.bingoType = e.target.value;
             document.getElementById('bingo-type').value = e.target.value;
-            // Sincronizar com modal antigo se existir
-            const mobileSelect = document.getElementById('mobile-bingo-type');
-            if (mobileSelect) {
-                mobileSelect.value = e.target.value;
-            }
             this.saveGame();
         });
-        document.getElementById('mobile-toggle-theme-sticky').addEventListener('click', () => this.toggleTheme());
-        document.getElementById('mobile-add-card-auto-sticky').addEventListener('click', () => {
-            const cardId = document.getElementById('mobile-card-id-sticky').value.trim();
-            this.addCardAuto(cardId);
-            document.getElementById('mobile-card-id-sticky').value = '';
+        document.getElementById('modal-toggle-theme').addEventListener('click', () => this.toggleTheme());
+        document.getElementById('modal-add-card-auto').addEventListener('click', () => {
+            this.addCardAuto();
         });
-        document.getElementById('mobile-add-card-manual-sticky').addEventListener('click', () => this.showManualCardModal());
-        document.getElementById('mobile-draw-random-sticky').addEventListener('click', () => this.drawRandomNumber());
-        document.getElementById('mobile-reset-game-sticky').addEventListener('click', () => this.resetGame());
+        document.getElementById('modal-add-card-manual').addEventListener('click', () => this.showManualCardModal());
+        document.getElementById('modal-draw-random').addEventListener('click', () => this.drawRandomNumber());
+        document.getElementById('modal-reset-game').addEventListener('click', () => this.resetGame());
         
         // Modal de edição de número
         document.getElementById('save-edit-number').addEventListener('click', () => this.saveEditedNumber());
@@ -311,50 +304,52 @@ class BingoGame {
         this.saveGame();
     }
 
-    showMobileConfigPanel() {
-        const panel = document.getElementById('mobile-config-panel');
-        if (panel) {
+    // Função para exibir o modal de configurações centralizado
+    showConfigModal() {
+        const modal = document.getElementById('config-modal');
+        if (modal) {
             // Sincronizar valores com os controles desktop
-            document.getElementById('mobile-max-number-sticky').value = this.maxNumber;
-            document.getElementById('mobile-bingo-type-sticky').value = this.bingoType;
+            document.getElementById('modal-max-number').value = this.maxNumber;
+            document.getElementById('modal-bingo-type').value = this.bingoType;
             
             // Atualizar texto do botão de tema
             const isDark = document.body.classList.contains('dark');
-            document.getElementById('mobile-toggle-theme-sticky').textContent = isDark ? 'Modo Claro' : 'Modo Escuro';
+            document.getElementById('modal-toggle-theme').textContent = isDark ? 'Modo Claro' : 'Modo Escuro';
             
-            panel.classList.remove('hidden');
+            modal.classList.remove('hidden');
+            
+            // Fechar modal ao clicar no overlay
+            const overlay = modal.querySelector('.config-modal-overlay');
+            overlay.addEventListener('click', () => this.hideConfigModal());
         }
     }
 
-    // Função para ocultar o painel de configurações mobile sticky
-    hideMobileConfigPanel() {
-        const panel = document.getElementById('mobile-config-panel');
-        if (panel) {
-            panel.classList.add('hidden');
+    // Função para ocultar o modal de configurações
+    hideConfigModal() {
+        const modal = document.getElementById('config-modal');
+        if (modal) {
+            modal.classList.add('hidden');
         }
     }
 
-    // Função para confirmar número máximo no painel sticky
-    confirmMaxNumberMobileSticky() {
-        const newMaxNumber = parseInt(document.getElementById('mobile-max-number-sticky').value);
+    // Função para confirmar número máximo no modal
+    confirmMaxNumberModal() {
+        const newMaxNumber = parseInt(document.getElementById('modal-max-number').value);
         
-        if (newMaxNumber < 25 || newMaxNumber > 99) {
-            alert('O número máximo deve estar entre 25 e 99.');
-            return;
-        }
-
-        if (newMaxNumber !== this.maxNumber) {
-            this.maxNumber = newMaxNumber;
-            this.availableNumbers = Array.from({ length: this.maxNumber }, (_, i) => i + 1);
-            
-            // Sincronizar com outros inputs
-            document.getElementById('max-number').value = newMaxNumber;
-            const mobileMaxInput = document.getElementById('mobile-max-number');
-            if (mobileMaxInput) {
-                mobileMaxInput.value = newMaxNumber;
+        if (newMaxNumber && newMaxNumber >= 25 && newMaxNumber <= 99) {
+            if (newMaxNumber !== this.maxNumber) {
+                this.maxNumber = newMaxNumber;
+                
+                // Sincronizar com o input desktop
+                document.getElementById('max-number').value = newMaxNumber;
+                
+                // Reiniciar o jogo com nova configuração
+                this.resetGame(true);
+                
+                this.showNotification('Configuração alterada', `Número máximo alterado para ${newMaxNumber}. O jogo foi reiniciado.`);
             }
-            
-            this.resetGame(true);
+        } else {
+            this.showNotification('Erro', 'Por favor, insira um número entre 25 e 99.');
         }
     }
 
@@ -395,9 +390,22 @@ class BingoGame {
          this.hideConfigModal();
      }
 
-    addCardAuto() {
-        const cardIdInput = document.getElementById('card-id');
-        const cardId = cardIdInput.value.trim();
+    addCardAuto(cardId = null) {
+        // Se não foi passado um cardId, tentar obter dos inputs disponíveis
+        if (!cardId) {
+            const cardIdInput = document.getElementById('card-id');
+            const modalCardIdInput = document.getElementById('modal-card-id');
+            
+            // Priorizar o input do modal se estiver visível
+            const modal = document.getElementById('config-modal');
+            const isModalVisible = modal && !modal.classList.contains('hidden');
+            
+            if (isModalVisible && modalCardIdInput) {
+                cardId = modalCardIdInput.value.trim();
+            } else if (cardIdInput) {
+                cardId = cardIdInput.value.trim();
+            }
+        }
         
         if (!cardId) {
             this.showNotification('Erro', 'Por favor, informe um número ou identificador para a cartela.');
@@ -414,12 +422,18 @@ class BingoGame {
         const card = new BingoCard(cardId);
         this.cards.push(card);
         
-        // Limpar input
-        cardIdInput.value = '';
+        // Limpar inputs
+        const cardIdInput = document.getElementById('card-id');
+        const modalCardIdInput = document.getElementById('modal-card-id');
+        
+        if (cardIdInput) cardIdInput.value = '';
+        if (modalCardIdInput) modalCardIdInput.value = '';
         
         // Salvar e renderizar
         this.saveGame();
         this.renderCards();
+        
+        this.showNotification('Sucesso', `Cartela "${cardId}" adicionada com sucesso!`);
     }
 
     showManualCardModal(card = null) {
