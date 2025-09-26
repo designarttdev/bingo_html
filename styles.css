@@ -320,6 +320,14 @@ body.dark .btn:focus-visible {
 .number-controls {
     display: grid;
     gap: 12px;
+    position: sticky;
+    top: 20px;
+    z-index: 50;
+    background: var(--surface);
+    padding: 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
 }
 
 .card-controls,
@@ -529,10 +537,14 @@ body.dark .card-cell.marked {
 .config-buttons {
     display: grid;
     gap: 12px;
+    grid-template-columns: 1fr;
+    margin-top: 8px;
 }
 
-.config-buttons {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+@media (min-width: 400px) {
+    .config-buttons {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 .notification {
@@ -543,7 +555,7 @@ body.dark .card-cell.marked {
     justify-content: center;
     background: rgba(15, 23, 42, 0.45);
     backdrop-filter: blur(4px);
-    z-index: 120;
+    z-index: 1100; /* Maior que o modal de configurações (1000) */
 }
 
 .notification.hidden {
@@ -695,8 +707,8 @@ body.dark .card-cell.marked {
         border-radius: var(--radius-lg);
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         max-width: 90vw;
-        max-height: 80vh;
-        width: 400px;
+        max-height: 85vh;
+        width: 420px;
         overflow-y: auto;
         transform: scale(0.9);
         transition: transform 0.3s ease;
@@ -733,6 +745,11 @@ body.dark .card-cell.marked {
         grid-template-columns: 1fr;
         gap: 12px;
         margin-top: 8px;
+    }
+
+    /* Modal de confirmação de exclusão */
+    #confirm-delete-modal {
+        z-index: 1200; /* Maior que notificações e modal de configurações */
     }
 
     /* Comportamento sticky para o botão de configurações */

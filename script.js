@@ -686,27 +686,54 @@ class BingoGame {
     }
 
     deleteCard(cardId) {
+        // Armazenar o ID da cartela para exclusão
+        this.cardToDelete = cardId;
+        
+        // Mostrar modal de confirmação
+        this.showConfirmDeleteModal(cardId);
+    }
+
+    showConfirmDeleteModal(cardId) {
+        const modal = document.getElementById('confirm-delete-modal');
+        const message = document.getElementById('confirm-delete-message');
+        
+        message.textContent = `Tem certeza que deseja excluir a cartela #${cardId}?`;
+        modal.classList.remove('hidden');
+    }
+
+    hideConfirmDeleteModal() {
+        const modal = document.getElementById('confirm-delete-modal');
+        modal.classList.add('hidden');
+        this.cardToDelete = null;
+    }
+
+    confirmDeleteCard() {
+        if (!this.cardToDelete) return;
+        
+        const cardId = this.cardToDelete;
+        
         // Converter cardId para número para garantir comparação correta
         const numericCardId = parseInt(cardId);
         const index = this.cards.findIndex(c => parseInt(c.id) === numericCardId);
         
         if (index !== -1) {
-            if (confirm(`Excluir cartela #${cardId}?`)) {
-                // Remover a cartela do array
-                this.cards.splice(index, 1);
-                
-                // Salvar o estado do jogo
-                this.saveGame();
-                
-                // Atualizar a interface
-                this.renderCards();
-                
-                // Mostrar notificação de sucesso
-                this.showNotification('Sucesso', `Cartela #${cardId} excluída com sucesso!`);
-            }
+            // Remover a cartela do array
+            this.cards.splice(index, 1);
+            
+            // Salvar o estado do jogo
+            this.saveGame();
+            
+            // Atualizar a interface
+            this.renderCards();
+            
+            // Mostrar notificação de sucesso
+            this.showNotification('Sucesso', `Cartela #${cardId} excluída com sucesso!`);
         } else {
             this.showNotification('Erro', 'Cartela não encontrada!');
         }
+        
+        // Fechar modal
+        this.hideConfirmDeleteModal();
     }
 
     checkBingo() {
@@ -954,4 +981,15 @@ class BingoGame {
 // Inicializar o jogo quando a página carregar
 document.addEventListener('DOMContentLoaded', () => {
     const game = new BingoGame();
+    
+    // Event listeners para modal de confirmação de exclusão
+    document.getElementById('confirm-delete-cancel').addEventListener('click', () => game.hideConfirmDeleteModal());
+    document.getElementById('confirm-delete-confirm').addEventListener('click', () => game.confirmDeleteCard());
+    
+    // Fechar modal ao clicar no overlay
+    document.getElementById('confirm-delete-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'confirm-delete-modal') {
+            game.hideConfirmDeleteModal();
+        }
+    });
 });
