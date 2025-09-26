@@ -1,4 +1,4 @@
-﻿:root {
+:root {
     color-scheme: light;
     --font-sans: 'Inter', 'Roboto', sans-serif;
     --bg: #f3f4f6;
@@ -670,6 +670,30 @@ body.dark .card-cell.marked {
         gap: 8px;
     }
 
+    /* Garantir que os controles rápidos tenham sticky no mobile */
+    .number-controls {
+        position: sticky !important;
+        top: 10px !important;
+        z-index: 100 !important;
+        background: var(--surface) !important;
+        padding: 12px !important;
+        border-radius: var(--radius-md) !important;
+        border: 1px solid var(--border) !important;
+        box-shadow: var(--shadow-md) !important;
+        margin-bottom: 16px !important;
+        width: 100%;
+    }
+
+    /* Ajustar o primary-controls para mobile */
+    .primary-controls {
+        position: relative;
+        background: transparent;
+        padding: 0;
+        border: none;
+        box-shadow: none;
+        display: flex;
+    }
+
     /* Modal de configurações centralizado */
     .config-modal {
         position: fixed;
@@ -841,10 +865,25 @@ body.dark .card-cell.marked {
     /* Garantir que o campo de número e botão marcar sejam visíveis */
     .primary-controls {
         display: flex;
+        position: relative;
+        background: transparent;
+        padding: 0;
+        border: none;
+        box-shadow: none;
     }
 
     .number-controls {
         display: grid;
+        position: sticky !important;
+        top: 10px !important;
+        z-index: 100 !important;
+        background: var(--surface) !important;
+        padding: 12px !important;
+        border-radius: var(--radius-md) !important;
+        border: 1px solid var(--border) !important;
+        box-shadow: var(--shadow-md) !important;
+        margin-bottom: 16px !important;
+        width: 100%;
     }
 }
 
