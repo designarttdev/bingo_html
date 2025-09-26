@@ -293,10 +293,10 @@ body.dark .btn:focus-visible {
 }
 
 .mobile-config-trigger {
-    position: sticky;
-    bottom: 24px;
+    position: relative;
+    bottom: 0;
     z-index: 10;
-    display: flex;
+    display: none;
     justify-content: center;
 }
 
@@ -847,14 +847,26 @@ body.dark .card-cell.marked {
         left: 50%;
         transform: translateX(-50%);
         z-index: 1000;
+        justify-content: center;
     }
 
-    /* Sobrescrever para sticky quando tem a classe específica */
+    /* Comportamento sticky específico quando tem a classe sticky-config-trigger */
     .mobile-config-trigger.sticky-config-trigger {
-        position: sticky !important;
-        left: auto;
-        transform: none;
+        position: fixed !important;
+        bottom: 20px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: auto !important;
+        padding: 0 !important;
+        box-sizing: border-box;
+        z-index: 1000 !important;
         justify-content: center;
+    }
+
+    .mobile-config-trigger.sticky-config-trigger .btn {
+        width: auto;
+        min-width: 200px;
+        padding: 12px 24px;
     }
 
     /* Ajustar o painel de controles para mostrar apenas os essenciais */
