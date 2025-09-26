@@ -59,6 +59,49 @@
                 <button id="open-config-mobile" class="btn secondary">⚙️ Configurações</button>
             </div>
 
+            <!-- Painel de configurações mobile sticky -->
+            <div id="mobile-config-panel" class="mobile-config-panel hidden">
+                <div class="mobile-config-content">
+                    <div class="mobile-config-header">
+                        <h3>Configurações</h3>
+                        <button id="close-mobile-config" class="btn-close">✕</button>
+                    </div>
+                    
+                    <div class="mobile-config-form">
+                        <div class="form-group">
+                            <label for="mobile-max-number-sticky">Número máximo:</label>
+                            <div class="max-number-controls">
+                                <input type="number" id="mobile-max-number-sticky" min="25" max="99" value="75" inputmode="numeric" pattern="[0-9]*">
+                                <button id="mobile-confirm-max-number-sticky" class="btn secondary">Confirmar</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mobile-bingo-type-sticky">Tipo de Bingo:</label>
+                            <select id="mobile-bingo-type-sticky">
+                                <option value="line">Horizontal/Vertical/Diagonal</option>
+                                <option value="full">Cartela Cheia</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <button id="mobile-toggle-theme-sticky" class="btn secondary">Modo Claro</button>
+                        </div>
+
+                        <div class="form-group">
+                            <input type="text" id="mobile-card-id-sticky" placeholder="Número da cartela">
+                        </div>
+
+                        <div class="mobile-config-buttons">
+                            <button id="mobile-add-card-auto-sticky" class="btn primary">Adicionar Cartela Automática</button>
+                            <button id="mobile-add-card-manual-sticky" class="btn secondary">Adicionar Cartela Manual</button>
+                            <button id="mobile-draw-random-sticky" class="btn accent">Sortear número</button>
+                            <button id="mobile-reset-game-sticky" class="btn danger">Reiniciar jogo</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="panel controls">
                 <div class="panel-header">
                     <div>

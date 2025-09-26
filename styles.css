@@ -658,6 +658,89 @@ body.dark .card-cell.marked {
         gap: 8px;
     }
 
+    /* Painel de configurações mobile sticky */
+    .mobile-config-panel {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: var(--surface);
+        border-bottom: 2px solid var(--border);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        transform: translateY(-100%);
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .mobile-config-panel:not(.hidden) {
+        transform: translateY(0);
+    }
+
+    .mobile-config-content {
+        padding: 16px;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    .mobile-config-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .mobile-config-header h3 {
+        margin: 0;
+        color: var(--text);
+        font-size: 1.2rem;
+    }
+
+    .btn-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: var(--radius);
+        transition: all 0.2s ease;
+    }
+
+    .btn-close:hover {
+        background: var(--surface-hover);
+        color: var(--text);
+    }
+
+    .mobile-config-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .mobile-config-buttons {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    .max-number-controls {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .max-number-controls input {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .max-number-controls button {
+        flex-shrink: 0;
+    }
+
     /* Ocultar painel de configurações na versão mobile */
     .config-panel {
         display: none;

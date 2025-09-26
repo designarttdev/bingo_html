@@ -72,17 +72,31 @@ class BingoGame {
         document.getElementById('notification-close').addEventListener('click', () => this.hideNotification());
         document.getElementById('save-config').addEventListener('click', () => this.saveConfig());
         
-        // Modal de configurações mobile
-        document.getElementById('open-config-mobile').addEventListener('click', () => this.showConfigModal());
-        document.getElementById('close-config-modal').addEventListener('click', () => this.hideConfigModal());
-        document.getElementById('save-mobile-config').addEventListener('click', () => this.saveMobileConfig());
-        document.getElementById('mobile-confirm-max-number').addEventListener('click', () => this.confirmMaxNumberMobile());
-        
-        // Botões mobile duplicados
-        document.getElementById('mobile-add-card-auto').addEventListener('click', () => this.addCardAutoMobile());
-        document.getElementById('mobile-add-card-manual').addEventListener('click', () => this.showManualCardModalMobile());
-        document.getElementById('mobile-draw-random').addEventListener('click', () => this.drawRandomNumber());
-        document.getElementById('mobile-reset-game').addEventListener('click', () => this.resetGameMobile());
+        // Botões mobile (modal antigo) - apenas os que existem
+        document.getElementById('open-config-mobile').addEventListener('click', () => this.showMobileConfigPanel());
+
+        // Botões do painel sticky mobile
+        document.getElementById('close-mobile-config').addEventListener('click', () => this.hideMobileConfigPanel());
+        document.getElementById('mobile-confirm-max-number-sticky').addEventListener('click', () => this.confirmMaxNumberMobileSticky());
+        document.getElementById('mobile-bingo-type-sticky').addEventListener('change', (e) => {
+            this.bingoType = e.target.value;
+            document.getElementById('bingo-type').value = e.target.value;
+            // Sincronizar com modal antigo se existir
+            const mobileSelect = document.getElementById('mobile-bingo-type');
+            if (mobileSelect) {
+                mobileSelect.value = e.target.value;
+            }
+            this.saveGame();
+        });
+        document.getElementById('mobile-toggle-theme-sticky').addEventListener('click', () => this.toggleTheme());
+        document.getElementById('mobile-add-card-auto-sticky').addEventListener('click', () => {
+            const cardId = document.getElementById('mobile-card-id-sticky').value.trim();
+            this.addCardAuto(cardId);
+            document.getElementById('mobile-card-id-sticky').value = '';
+        });
+        document.getElementById('mobile-add-card-manual-sticky').addEventListener('click', () => this.showManualCardModal());
+        document.getElementById('mobile-draw-random-sticky').addEventListener('click', () => this.drawRandomNumber());
+        document.getElementById('mobile-reset-game-sticky').addEventListener('click', () => this.resetGame());
         
         // Modal de edição de número
         document.getElementById('save-edit-number').addEventListener('click', () => this.saveEditedNumber());
@@ -168,22 +182,52 @@ class BingoGame {
         const saved = localStorage.getItem('theme') || 'dark';
         const toggleBtn = document.getElementById('toggle-theme');
         const mobileToggleBtn = document.getElementById('mobile-toggle-theme');
+        const mobileToggleStickyBtn = document.getElementById('mobile-toggle-theme-sticky');
         
         document.body.classList.toggle('dark', saved === 'dark');
         const themeText = saved === 'dark' ? 'Modo Claro' : 'Modo Escuro';
         toggleBtn.textContent = themeText;
-        mobileToggleBtn.textContent = themeText;
+        if (mobileToggleBtn) {
+            mobileToggleBtn.textContent = themeText;
+        }
+        if (mobileToggleStickyBtn) {
+            mobileToggleStickyBtn.textContent = themeText;
+        }
         
         const toggleTheme = () => {
             const dark = document.body.classList.toggle('dark');
             localStorage.setItem('theme', dark ? 'dark' : 'light');
             const newThemeText = dark ? 'Modo Claro' : 'Modo Escuro';
             toggleBtn.textContent = newThemeText;
-            mobileToggleBtn.textContent = newThemeText;
+            if (mobileToggleBtn) {
+                mobileToggleBtn.textContent = newThemeText;
+            }
+            if (mobileToggleStickyBtn) {
+                mobileToggleStickyBtn.textContent = newThemeText;
+            }
         };
         
         toggleBtn.addEventListener('click', toggleTheme);
-        mobileToggleBtn.addEventListener('click', toggleTheme);
+        if (mobileToggleBtn) {
+            mobileToggleBtn.addEventListener('click', toggleTheme);
+        }
+    }
+
+    toggleTheme() {
+        const isDark = document.body.classList.toggle('dark');
+        const themeText = isDark ? 'Modo Claro' : 'Modo Escuro';
+        
+        document.getElementById('toggle-theme').textContent = themeText;
+        const mobileToggleBtn = document.getElementById('mobile-toggle-theme');
+        if (mobileToggleBtn) {
+            mobileToggleBtn.textContent = themeText;
+        }
+        const stickyBtn = document.getElementById('mobile-toggle-theme-sticky');
+        if (stickyBtn) {
+            stickyBtn.textContent = themeText;
+        }
+        
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
     }
 
     saveConfig() {
@@ -265,6 +309,53 @@ class BingoGame {
         }
         
         this.saveGame();
+    }
+
+    showMobileConfigPanel() {
+        const panel = document.getElementById('mobile-config-panel');
+        if (panel) {
+            // Sincronizar valores com os controles desktop
+            document.getElementById('mobile-max-number-sticky').value = this.maxNumber;
+            document.getElementById('mobile-bingo-type-sticky').value = this.bingoType;
+            
+            // Atualizar texto do botão de tema
+            const isDark = document.body.classList.contains('dark');
+            document.getElementById('mobile-toggle-theme-sticky').textContent = isDark ? 'Modo Claro' : 'Modo Escuro';
+            
+            panel.classList.remove('hidden');
+        }
+    }
+
+    // Função para ocultar o painel de configurações mobile sticky
+    hideMobileConfigPanel() {
+        const panel = document.getElementById('mobile-config-panel');
+        if (panel) {
+            panel.classList.add('hidden');
+        }
+    }
+
+    // Função para confirmar número máximo no painel sticky
+    confirmMaxNumberMobileSticky() {
+        const newMaxNumber = parseInt(document.getElementById('mobile-max-number-sticky').value);
+        
+        if (newMaxNumber < 25 || newMaxNumber > 99) {
+            alert('O número máximo deve estar entre 25 e 99.');
+            return;
+        }
+
+        if (newMaxNumber !== this.maxNumber) {
+            this.maxNumber = newMaxNumber;
+            this.availableNumbers = Array.from({ length: this.maxNumber }, (_, i) => i + 1);
+            
+            // Sincronizar com outros inputs
+            document.getElementById('max-number').value = newMaxNumber;
+            const mobileMaxInput = document.getElementById('mobile-max-number');
+            if (mobileMaxInput) {
+                mobileMaxInput.value = newMaxNumber;
+            }
+            
+            this.resetGame(true);
+        }
     }
 
     saveMobileConfig() {
