@@ -580,9 +580,8 @@ class BingoGame {
     }
 
     deleteCard(cardId) {
-        // Converter cardId para número para garantir comparação correta
-        const numericCardId = parseInt(cardId);
-        const index = this.cards.findIndex(c => parseInt(c.id) === numericCardId);
+        // Buscar a cartela pelo ID exato (sem conversão para número)
+        const index = this.cards.findIndex(c => c.id === cardId);
         
         if (index !== -1) {
             if (confirm(`Excluir cartela #${cardId}?`)) {
