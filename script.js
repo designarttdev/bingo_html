@@ -72,24 +72,16 @@ class BingoGame {
         document.getElementById('notification-close').addEventListener('click', () => this.hideNotification());
         document.getElementById('save-config').addEventListener('click', () => this.saveConfig());
         
-        // Botões mobile (modal centralizado)
+        // Modal de configurações mobile
         document.getElementById('open-config-mobile').addEventListener('click', () => this.showConfigModal());
-
-        // Botões do modal de configurações
-        document.getElementById('close-config-modal-btn').addEventListener('click', () => this.hideConfigModal());
-        document.getElementById('modal-confirm-max-number').addEventListener('click', () => this.confirmMaxNumberModal());
-        document.getElementById('modal-bingo-type').addEventListener('change', (e) => {
-            this.bingoType = e.target.value;
-            document.getElementById('bingo-type').value = e.target.value;
-            this.saveGame();
-        });
-        document.getElementById('modal-toggle-theme').addEventListener('click', () => this.toggleTheme());
-        document.getElementById('modal-add-card-auto').addEventListener('click', () => {
-            this.addCardAuto();
-        });
-        document.getElementById('modal-add-card-manual').addEventListener('click', () => this.showManualCardModal());
-        document.getElementById('modal-draw-random').addEventListener('click', () => this.drawRandomNumber());
-        document.getElementById('modal-reset-game').addEventListener('click', () => this.resetGame());
+        document.getElementById('close-config-modal').addEventListener('click', () => this.hideConfigModal());
+        document.getElementById('save-mobile-config').addEventListener('click', () => this.saveMobileConfig());
+        
+        // Botões mobile duplicados
+        document.getElementById('mobile-add-card-auto').addEventListener('click', () => this.addCardAutoMobile());
+        document.getElementById('mobile-add-card-manual').addEventListener('click', () => this.showManualCardModalMobile());
+        document.getElementById('mobile-draw-random').addEventListener('click', () => this.drawRandomNumber());
+        document.getElementById('mobile-reset-game').addEventListener('click', () => this.resetGameMobile());
         
         // Modal de edição de número
         document.getElementById('save-edit-number').addEventListener('click', () => this.saveEditedNumber());
@@ -172,55 +164,55 @@ class BingoGame {
     }
 
     initTheme() {
-        const saved = localStorage.getItem('theme') || 'dark';
+        console.log('Inicializando tema...');
+        
+        // Buscar todos os botões de tema possíveis
         const toggleBtn = document.getElementById('toggle-theme');
         const mobileToggleBtn = document.getElementById('mobile-toggle-theme');
-        const mobileToggleStickyBtn = document.getElementById('mobile-toggle-theme-sticky');
+        const openConfigMobile = document.getElementById('open-config-mobile'); // Agora é o botão de tema
         
-        document.body.classList.toggle('dark', saved === 'dark');
-        const themeText = saved === 'dark' ? 'Modo Claro' : 'Modo Escuro';
-        toggleBtn.textContent = themeText;
-        if (mobileToggleBtn) {
-            mobileToggleBtn.textContent = themeText;
+        console.log('Botões encontrados:', {
+            toggleBtn: !!toggleBtn,
+            mobileToggleBtn: !!mobileToggleBtn,
+            openConfigMobile: !!openConfigMobile
+        });
+        
+        // Verificar tema salvo
+        const savedTheme = localStorage.getItem('theme');
+        const isDark = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        
+        console.log('Tema atual:', isDark ? 'dark' : 'light');
+        
+        // Aplicar tema
+        if (isDark) {
+            document.body.classList.add('dark');
+        } else {
+            document.body.classList.remove('dark');
         }
-        if (mobileToggleStickyBtn) {
-            mobileToggleStickyBtn.textContent = themeText;
-        }
+        
+        // Atualizar texto dos botões que têm texto
+        const themeText = isDark ? 'Modo Claro' : 'Modo Escuro';
+        if (toggleBtn) toggleBtn.textContent = themeText;
+        if (mobileToggleBtn) mobileToggleBtn.textContent = themeText;
         
         const toggleTheme = () => {
             const dark = document.body.classList.toggle('dark');
             localStorage.setItem('theme', dark ? 'dark' : 'light');
             const newThemeText = dark ? 'Modo Claro' : 'Modo Escuro';
-            toggleBtn.textContent = newThemeText;
-            if (mobileToggleBtn) {
-                mobileToggleBtn.textContent = newThemeText;
-            }
-            if (mobileToggleStickyBtn) {
-                mobileToggleStickyBtn.textContent = newThemeText;
-            }
+            
+            // Atualizar texto dos botões que têm texto
+            if (toggleBtn) toggleBtn.textContent = newThemeText;
+            if (mobileToggleBtn) mobileToggleBtn.textContent = newThemeText;
+            
+            console.log('Tema alterado para:', dark ? 'dark' : 'light');
         };
         
-        toggleBtn.addEventListener('click', toggleTheme);
-        if (mobileToggleBtn) {
-            mobileToggleBtn.addEventListener('click', toggleTheme);
-        }
-    }
-
-    toggleTheme() {
-        const isDark = document.body.classList.toggle('dark');
-        const themeText = isDark ? 'Modo Claro' : 'Modo Escuro';
-        
-        document.getElementById('toggle-theme').textContent = themeText;
-        const mobileToggleBtn = document.getElementById('mobile-toggle-theme');
-        if (mobileToggleBtn) {
-            mobileToggleBtn.textContent = themeText;
-        }
-        const stickyBtn = document.getElementById('mobile-toggle-theme-sticky');
-        if (stickyBtn) {
-            stickyBtn.textContent = themeText;
-        }
-        
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        // Adicionar event listeners
+        [toggleBtn, mobileToggleBtn, openConfigMobile].forEach(btn => {
+            if (btn) {
+                btn.addEventListener('click', toggleTheme);
+            }
+        });
     }
 
     saveConfig() {
@@ -304,55 +296,6 @@ class BingoGame {
         this.saveGame();
     }
 
-    // Função para exibir o modal de configurações centralizado
-    showConfigModal() {
-        const modal = document.getElementById('config-modal');
-        if (modal) {
-            // Sincronizar valores com os controles desktop
-            document.getElementById('modal-max-number').value = this.maxNumber;
-            document.getElementById('modal-bingo-type').value = this.bingoType;
-            
-            // Atualizar texto do botão de tema
-            const isDark = document.body.classList.contains('dark');
-            document.getElementById('modal-toggle-theme').textContent = isDark ? 'Modo Claro' : 'Modo Escuro';
-            
-            modal.classList.remove('hidden');
-            
-            // Fechar modal ao clicar no overlay
-            const overlay = modal.querySelector('.config-modal-overlay');
-            overlay.addEventListener('click', () => this.hideConfigModal());
-        }
-    }
-
-    // Função para ocultar o modal de configurações
-    hideConfigModal() {
-        const modal = document.getElementById('config-modal');
-        if (modal) {
-            modal.classList.add('hidden');
-        }
-    }
-
-    // Função para confirmar número máximo no modal
-    confirmMaxNumberModal() {
-        const newMaxNumber = parseInt(document.getElementById('modal-max-number').value);
-        
-        if (newMaxNumber && newMaxNumber >= 25 && newMaxNumber <= 99) {
-            if (newMaxNumber !== this.maxNumber) {
-                this.maxNumber = newMaxNumber;
-                
-                // Sincronizar com o input desktop
-                document.getElementById('max-number').value = newMaxNumber;
-                
-                // Reiniciar o jogo com nova configuração
-                this.resetGame(true);
-                
-                this.showNotification('Configuração alterada', `Número máximo alterado para ${newMaxNumber}. O jogo foi reiniciado.`);
-            }
-        } else {
-            this.showNotification('Erro', 'Por favor, insira um número entre 25 e 99.');
-        }
-    }
-
     saveMobileConfig() {
         const bingoTypeSelect = document.getElementById('mobile-bingo-type');
         const newBingoType = bingoTypeSelect.value;
@@ -390,22 +333,9 @@ class BingoGame {
          this.hideConfigModal();
      }
 
-    addCardAuto(cardId = null) {
-        // Se não foi passado um cardId, tentar obter dos inputs disponíveis
-        if (!cardId) {
-            const cardIdInput = document.getElementById('card-id');
-            const modalCardIdInput = document.getElementById('modal-card-id');
-            
-            // Priorizar o input do modal se estiver visível
-            const modal = document.getElementById('config-modal');
-            const isModalVisible = modal && !modal.classList.contains('hidden');
-            
-            if (isModalVisible && modalCardIdInput) {
-                cardId = modalCardIdInput.value.trim();
-            } else if (cardIdInput) {
-                cardId = cardIdInput.value.trim();
-            }
-        }
+    addCardAuto() {
+        const cardIdInput = document.getElementById('card-id');
+        const cardId = cardIdInput.value.trim();
         
         if (!cardId) {
             this.showNotification('Erro', 'Por favor, informe um número ou identificador para a cartela.');
@@ -422,18 +352,12 @@ class BingoGame {
         const card = new BingoCard(cardId);
         this.cards.push(card);
         
-        // Limpar inputs
-        const cardIdInput = document.getElementById('card-id');
-        const modalCardIdInput = document.getElementById('modal-card-id');
-        
-        if (cardIdInput) cardIdInput.value = '';
-        if (modalCardIdInput) modalCardIdInput.value = '';
+        // Limpar input
+        cardIdInput.value = '';
         
         // Salvar e renderizar
         this.saveGame();
         this.renderCards();
-        
-        this.showNotification('Sucesso', `Cartela "${cardId}" adicionada com sucesso!`);
     }
 
     showManualCardModal(card = null) {
@@ -686,54 +610,26 @@ class BingoGame {
     }
 
     deleteCard(cardId) {
-        // Armazenar o ID da cartela para exclusão
-        this.cardToDelete = cardId;
-        
-        // Mostrar modal de confirmação
-        this.showConfirmDeleteModal(cardId);
-    }
-
-    showConfirmDeleteModal(cardId) {
-        const modal = document.getElementById('confirm-delete-modal');
-        const message = document.getElementById('confirm-delete-message');
-        
-        message.textContent = `Tem certeza que deseja excluir a cartela #${cardId}?`;
-        modal.classList.remove('hidden');
-    }
-
-    hideConfirmDeleteModal() {
-        const modal = document.getElementById('confirm-delete-modal');
-        modal.classList.add('hidden');
-        this.cardToDelete = null;
-    }
-
-    confirmDeleteCard() {
-        if (!this.cardToDelete) return;
-        
-        const cardId = this.cardToDelete;
-        
-        // Converter cardId para número para garantir comparação correta
-        const numericCardId = parseInt(cardId);
-        const index = this.cards.findIndex(c => parseInt(c.id) === numericCardId);
+        // Buscar a cartela pelo ID exato (sem conversão para número)
+        const index = this.cards.findIndex(c => c.id === cardId);
         
         if (index !== -1) {
-            // Remover a cartela do array
-            this.cards.splice(index, 1);
-            
-            // Salvar o estado do jogo
-            this.saveGame();
-            
-            // Atualizar a interface
-            this.renderCards();
-            
-            // Mostrar notificação de sucesso
-            this.showNotification('Sucesso', `Cartela #${cardId} excluída com sucesso!`);
+            if (confirm(`Excluir cartela #${cardId}?`)) {
+                // Remover a cartela do array
+                this.cards.splice(index, 1);
+                
+                // Salvar o estado do jogo
+                this.saveGame();
+                
+                // Atualizar a interface
+                this.renderCards();
+                
+                // Mostrar notificação de sucesso
+                this.showNotification('Sucesso', `Cartela #${cardId} excluída com sucesso!`);
+            }
         } else {
             this.showNotification('Erro', 'Cartela não encontrada!');
         }
-        
-        // Fechar modal
-        this.hideConfirmDeleteModal();
     }
 
     checkBingo() {
@@ -981,15 +877,4 @@ class BingoGame {
 // Inicializar o jogo quando a página carregar
 document.addEventListener('DOMContentLoaded', () => {
     const game = new BingoGame();
-    
-    // Event listeners para modal de confirmação de exclusão
-    document.getElementById('confirm-delete-cancel').addEventListener('click', () => game.hideConfirmDeleteModal());
-    document.getElementById('confirm-delete-confirm').addEventListener('click', () => game.confirmDeleteCard());
-    
-    // Fechar modal ao clicar no overlay
-    document.getElementById('confirm-delete-modal').addEventListener('click', (e) => {
-        if (e.target.id === 'confirm-delete-modal') {
-            game.hideConfirmDeleteModal();
-        }
-    });
 });
