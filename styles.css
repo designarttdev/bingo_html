@@ -827,6 +827,54 @@ select::placeholder {
         border-radius: 12px;
     }
     
+    /* Make drawn-panel section fixed below primary controls */
+    .drawn-panel {
+        position: fixed;
+        top: 120px; /* Below primary controls */
+        left: 0;
+        right: 0;
+        z-index: 90;
+        background-color: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 16px;
+        margin: 0;
+        border-radius: 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    
+    /* Dark mode styles for fixed drawn-panel */
+    body.dark .drawn-panel {
+        background-color: rgba(17, 24, 39, 0.95);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Adjust numbers header for mobile */
+    .drawn-panel .numbers-header {
+        margin-bottom: 12px;
+    }
+    
+    .drawn-panel .numbers-header .panel-heading {
+        margin-bottom: 8px;
+    }
+    
+    .drawn-panel .numbers-header h2 {
+        font-size: 18px;
+        margin: 0;
+    }
+    
+    .drawn-panel .numbers-header p {
+        font-size: 14px;
+        margin: 4px 0 0 0;
+        opacity: 0.8;
+    }
+    
+    .drawn-panel .numbers-header select {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+    
     /* Show mobile config trigger */
     .mobile-config-trigger {
         display: flex;
@@ -842,9 +890,14 @@ select::placeholder {
         margin-top: 20px;
     }
     
-    /* Adjust cards container for fixed header */
+    /* Adjust cards container for fixed headers */
     .cards-container {
-        margin-top: 120px;
+        margin-top: 340px; /* Space for both fixed sections */
+    }
+    
+    /* Adjust main content area */
+    .content-section {
+        margin-top: 340px; /* Space for both fixed sections */
     }
 }
 
