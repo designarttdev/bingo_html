@@ -777,25 +777,38 @@ select::placeholder {
         display: none !important;
     }
     
-    /* Make primary controls fixed at top */
-    .primary-controls {
-        position: fixed;
+    /* Make controls-panel sticky at top instead of fixed */
+    .controls-panel {
+        position: sticky;
         top: 0;
-        left: 0;
-        right: 0;
         z-index: 100;
-        background-color: rgba(255, 255, 255, 0.95);
+        background: var(--color-surface);
         backdrop-filter: blur(10px);
-        padding: 16px;
-        margin: 0;
-        border-radius: 0 0 16px 16px;
+        -webkit-backdrop-filter: blur(10px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-bottom: 16px;
     }
     
-    /* Dark mode styles for fixed primary controls */
-    body.dark .primary-controls {
-        background-color: rgba(17, 24, 39, 0.95);
+    /* Dark mode styles for sticky controls-panel */
+    body.dark .controls-panel {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Remove fixed positioning from primary controls since parent is now sticky */
+    .primary-controls {
+        position: static;
+        background: transparent;
+        backdrop-filter: none;
+        padding: 0;
+        margin: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+    
+    /* Remove dark mode styles for primary controls */
+    body.dark .primary-controls {
+        background: transparent;
+        box-shadow: none;
     }
     
     .primary-controls .number-controls {
@@ -827,7 +840,7 @@ select::placeholder {
         border-radius: 12px;
     }
     
-    /* Adjust drawn-panel section for mobile */
+    /* Remove sticky positioning from drawn-panel - return to normal flow */
     .drawn-panel {
         padding: 16px;
         margin: 16px 0;
