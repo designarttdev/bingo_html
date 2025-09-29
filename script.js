@@ -60,9 +60,6 @@ class BingoGame {
         
         // Renderizar o estado inicial
         this.renderGame();
-        
-        // Inicializar configurações
-        this.initSettings();
     }
 
     initUI() {
@@ -79,9 +76,6 @@ class BingoGame {
         document.getElementById('open-config-mobile').addEventListener('click', () => this.showConfigModal());
         document.getElementById('close-config-modal').addEventListener('click', () => this.hideConfigModal());
         document.getElementById('save-mobile-config').addEventListener('click', () => this.saveMobileConfig());
-        
-        // Settings menu
-        this.initSettingsMenu();
         
         // Botões mobile duplicados
         document.getElementById('mobile-add-card-auto').addEventListener('click', () => this.addCardAutoMobile());
@@ -175,12 +169,12 @@ class BingoGame {
         // Buscar todos os botões de tema possíveis
         const toggleBtn = document.getElementById('toggle-theme');
         const mobileToggleBtn = document.getElementById('mobile-toggle-theme');
-        const mobileThemeToggle = document.getElementById('mobile-theme-toggle'); // Novo botão de tema mobile
+        const openConfigMobile = document.getElementById('open-config-mobile'); // Agora é o botão de tema
         
         console.log('Botões encontrados:', {
             toggleBtn: !!toggleBtn,
             mobileToggleBtn: !!mobileToggleBtn,
-            mobileThemeToggle: !!mobileThemeToggle
+            openConfigMobile: !!openConfigMobile
         });
         
         // Verificar tema salvo
@@ -214,7 +208,7 @@ class BingoGame {
         };
         
         // Adicionar event listeners
-        [toggleBtn, mobileToggleBtn, mobileThemeToggle].forEach(btn => {
+        [toggleBtn, mobileToggleBtn, openConfigMobile].forEach(btn => {
             if (btn) {
                 btn.addEventListener('click', toggleTheme);
             }
@@ -249,15 +243,11 @@ class BingoGame {
         document.getElementById('mobile-bingo-type').value = this.bingoType;
         document.getElementById('mobile-card-id').value = document.getElementById('card-id').value;
         
-        const modal = document.getElementById('config-modal');
-        modal.classList.remove('hidden');
-        modal.style.display = 'flex';
+        document.getElementById('config-modal').style.display = 'flex';
     }
     
     hideConfigModal() {
-        const modal = document.getElementById('config-modal');
-        modal.style.display = 'none';
-        modal.classList.add('hidden');
+        document.getElementById('config-modal').style.display = 'none';
     }
     
     // Confirmar número máximo (desktop) - salva imediatamente sem fechar pop-up
@@ -880,202 +870,6 @@ class BingoGame {
             } catch (error) {
                 console.error('Erro ao carregar dados salvos:', error);
             }
-        }
-    }
-
-    // Settings functionality
-    initSettings() {
-        // Load settings from localStorage
-        this.settings = {
-            autoMark: localStorage.getItem('bingo-auto-mark') === 'true',
-            soundEffects: localStorage.getItem('bingo-sound-effects') === 'true',
-            animations: localStorage.getItem('bingo-animations') !== 'false' // default true
-        };
-        
-        // Update status displays
-        this.updateSettingsStatus();
-    }
-
-    initSettingsMenu() {
-        // Desktop settings menu
-        const settingsMenu = document.getElementById('settings-menu');
-        const settingsDropdown = document.getElementById('settings-dropdown-content');
-        
-        if (settingsMenu && settingsDropdown) {
-            settingsMenu.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.toggleSettingsDropdown(settingsMenu, settingsDropdown);
-            });
-        }
-
-        // Mobile settings menu
-        const mobileSettingsMenu = document.getElementById('mobile-settings-menu');
-        const mobileSettingsDropdown = document.getElementById('mobile-settings-dropdown-content');
-        
-        if (mobileSettingsMenu && mobileSettingsDropdown) {
-            mobileSettingsMenu.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.toggleSettingsDropdown(mobileSettingsMenu, mobileSettingsDropdown);
-            });
-        }
-
-        // Settings options event listeners
-        document.querySelectorAll('.settings-option').forEach(option => {
-            option.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const action = option.dataset.action;
-                this.handleSettingAction(action);
-            });
-        });
-
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', () => {
-            this.closeAllSettingsDropdowns();
-        });
-    }
-
-    toggleSettingsDropdown(trigger, dropdown) {
-        const isOpen = dropdown.classList.contains('show');
-        
-        // Close all dropdowns first
-        this.closeAllSettingsDropdowns();
-        
-        if (!isOpen) {
-            trigger.classList.add('active');
-            dropdown.classList.add('show');
-        }
-    }
-
-    closeAllSettingsDropdowns() {
-        document.querySelectorAll('.settings-trigger').forEach(trigger => {
-            trigger.classList.remove('active');
-        });
-        document.querySelectorAll('.settings-dropdown-content').forEach(dropdown => {
-            dropdown.classList.remove('show');
-        });
-    }
-
-    handleSettingAction(action) {
-        switch (action) {
-            case 'auto-mark':
-                this.toggleAutoMark();
-                break;
-            case 'sound-effects':
-                this.toggleSoundEffects();
-                break;
-            case 'animations':
-                this.toggleAnimations();
-                break;
-            case 'export-data':
-                this.exportGameData();
-                break;
-        }
-        
-        // Close dropdowns after action
-        this.closeAllSettingsDropdowns();
-    }
-
-    toggleAutoMark() {
-        this.settings.autoMark = !this.settings.autoMark;
-        localStorage.setItem('bingo-auto-mark', this.settings.autoMark.toString());
-        this.updateSettingsStatus();
-        
-        this.showNotification(
-            this.settings.autoMark ? 'Marcação automática ativada' : 'Marcação automática desativada',
-            this.settings.autoMark ? 'success' : 'info'
-        );
-    }
-
-    toggleSoundEffects() {
-        this.settings.soundEffects = !this.settings.soundEffects;
-        localStorage.setItem('bingo-sound-effects', this.settings.soundEffects.toString());
-        this.updateSettingsStatus();
-        
-        this.showNotification(
-            this.settings.soundEffects ? 'Efeitos sonoros ativados' : 'Efeitos sonoros desativados',
-            this.settings.soundEffects ? 'success' : 'info'
-        );
-    }
-
-    toggleAnimations() {
-        this.settings.animations = !this.settings.animations;
-        localStorage.setItem('bingo-animations', this.settings.animations.toString());
-        this.updateSettingsStatus();
-        
-        // Apply/remove animations class to body
-        document.body.classList.toggle('no-animations', !this.settings.animations);
-        
-        this.showNotification(
-            this.settings.animations ? 'Animações ativadas' : 'Animações desativadas',
-            this.settings.animations ? 'success' : 'info'
-        );
-    }
-
-    exportGameData() {
-        const gameData = {
-            cards: this.cards,
-            drawnNumbers: this.drawnNumbers,
-            maxNumber: this.maxNumber,
-            bingoType: this.bingoType,
-            sortMode: this.sortMode,
-            settings: this.settings,
-            exportDate: new Date().toISOString()
-        };
-
-        const dataStr = JSON.stringify(gameData, null, 2);
-        const dataBlob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(dataBlob);
-        
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `bingo-data-${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        
-        this.showNotification('Dados exportados com sucesso!', 'success');
-    }
-
-    updateSettingsStatus() {
-        // Update desktop status
-        const autoMarkStatus = document.getElementById('auto-mark-status');
-        const soundEffectsStatus = document.getElementById('sound-effects-status');
-        const animationsStatus = document.getElementById('animations-status');
-        
-        if (autoMarkStatus) {
-            autoMarkStatus.textContent = this.settings.autoMark ? 'Ativado' : 'Desativado';
-            autoMarkStatus.classList.toggle('active', this.settings.autoMark);
-        }
-        
-        if (soundEffectsStatus) {
-            soundEffectsStatus.textContent = this.settings.soundEffects ? 'Ativado' : 'Desativado';
-            soundEffectsStatus.classList.toggle('active', this.settings.soundEffects);
-        }
-        
-        if (animationsStatus) {
-            animationsStatus.textContent = this.settings.animations ? 'Ativado' : 'Desativado';
-            animationsStatus.classList.toggle('active', this.settings.animations);
-        }
-
-        // Update mobile status
-        const mobileAutoMarkStatus = document.getElementById('mobile-auto-mark-status');
-        const mobileSoundEffectsStatus = document.getElementById('mobile-sound-effects-status');
-        const mobileAnimationsStatus = document.getElementById('mobile-animations-status');
-        
-        if (mobileAutoMarkStatus) {
-            mobileAutoMarkStatus.textContent = this.settings.autoMark ? 'Ativado' : 'Desativado';
-            mobileAutoMarkStatus.classList.toggle('active', this.settings.autoMark);
-        }
-        
-        if (mobileSoundEffectsStatus) {
-            mobileSoundEffectsStatus.textContent = this.settings.soundEffects ? 'Ativado' : 'Desativado';
-            mobileSoundEffectsStatus.classList.toggle('active', this.settings.soundEffects);
-        }
-        
-        if (mobileAnimationsStatus) {
-            mobileAnimationsStatus.textContent = this.settings.animations ? 'Ativado' : 'Desativado';
-            mobileAnimationsStatus.classList.toggle('active', this.settings.animations);
         }
     }
 }
