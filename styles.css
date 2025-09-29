@@ -54,7 +54,6 @@ body.dark {
 
 html, body {
     min-height: 100%;
-    overflow-x: hidden;
 }
 
 body {
@@ -68,7 +67,6 @@ body {
     font-size: 16px;
     padding: clamp(28px, 7vh, 72px) clamp(18px, 6vw, 72px);
     transition: background 400ms ease, color 200ms ease;
-    overflow-x: hidden;
 }
 
 body::before {
@@ -572,30 +570,6 @@ select::placeholder {
     box-shadow: var(--shadow-soft);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
-}
-
-/* Esconder scrollbars globalmente mas manter funcionalidade */
-html::-webkit-scrollbar,
-body::-webkit-scrollbar {
-    width: 0px;
-    background: transparent;
-}
-
-html,
-body {
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge */
-}
-
-/* Esconder scrollbar mas manter funcionalidade */
-.modal-content::-webkit-scrollbar {
-    width: 0px;
-    background: transparent;
-}
-
-.modal-content {
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge */
 }
 
 .modal-form {

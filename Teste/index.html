@@ -4,87 +4,165 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aplicativo de Bingo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body class="dark">
-    <div class="container">
-        <header>
-            <h1>BINGO</h1>
+    <div class="app-shell">
+        <header class="app-header surface">
+            <div class="branding">
+                <span class="eyebrow">Painel do sorteio</span>
+                <h1>Bingo</h1>
+                <p>Controle números sorteados, cartelas e vencedores com uma experiência moderna.</p>
+            </div>
+            <div class="header-badge">
+                <span class="badge-icon" aria-hidden="true">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 3L13.89 8.26L19.51 8.74L15.17 12.48L16.45 18L12 14.9L7.55 18L8.83 12.48L4.49 8.74L10.11 8.26L12 3Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+                <span class="badge-text">Tudo sincronizado em tempo real</span>
+            </div>
         </header>
 
-        <div class="config-panel">
-            <h2>Configurações</h2>
-            <div class="config-item">
-                <label for="max-number">Número máximo do sorteio:</label>
-                <input type="number" id="max-number" min="25" max="99" value="75" inputmode="numeric" pattern="[0-9]*">
-                <button id="save-config" class="btn primary">Salvar</button>
-            </div>
-            <div class="config-item">
-                <label for="bingo-type">Tipo de Bingo:</label>
-                <select id="bingo-type">
-                    <option value="line">Horizontal/Vertical/Diagonal</option>
-                    <option value="full">Cartela Cheia</option>
-                </select>
-            </div>
-            <div class="config-item">
-                <button id="toggle-theme" class="btn secondary">Modo Claro</button>
-            </div>
-            <p class="config-info">Nota: Alterar o número máximo reiniciará o jogo atual.</p>
-        </div>
-
-        <!-- Botão de configurações para mobile -->
-        <div class="mobile-config-trigger">
-            <button id="open-config-mobile" class="btn secondary">⚙️ Configurações</button>
-        </div>
-
-        <div class="controls">
-            <!-- Controles principais sempre visíveis -->
-            <div class="primary-controls">
-                <div class="number-controls">
-                    <input type="number" id="drawn-number" min="1" max="99" placeholder="Número sorteado" inputmode="numeric" pattern="[0-9]*">
-                    <button id="mark-number" class="btn secondary">Marcar Número</button>
+        <main class="app-grid">
+            <aside class="config-panel surface">
+                <div class="panel-heading">
+                    <div class="panel-icon" aria-hidden="true">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 15.5C10.04 15.5 8.5 13.96 8.5 12C8.5 10.04 10.04 8.5 12 8.5C13.96 8.5 15.5 10.04 15.5 12C15.5 13.96 13.96 15.5 12 15.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M19.4 15A1.65 1.65 0 0 0 21 13.81V10.19A1.65 1.65 0 0 0 19.4 9L17.9 8.59A1.65 1.65 0 0 1 16.92 7.68L16.41 6.21A1.65 1.65 0 0 0 14.82 5.1H9.18A1.65 1.65 0 0 0 7.59 6.21L7.08 7.68A1.65 1.65 0 0 1 6.1 8.59L4.6 9A1.65 1.65 0 0 0 3 10.19V13.81A1.65 1.65 0 0 0 4.6 15L6.1 15.41C6.46 15.5 6.77 15.73 6.92 16.07L7.59 17.79A1.65 1.65 0 0 0 9.18 18.9H14.82A1.65 1.65 0 0 0 16.41 17.79L17.08 16.07C17.23 15.73 17.54 15.5 17.9 15.41L19.4 15Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2>Configurações</h2>
+                        <p>Ajuste os detalhes do sorteio de maneira rápida.</p>
+                    </div>
                 </div>
-            </div>
-            
-            <!-- Controles secundários (ocultos em mobile) -->
-            <div class="secondary-controls">
-                <div class="card-controls">
-                    <input type="text" id="card-id" placeholder="Número da cartela">
-                    <button id="add-card-auto" class="btn primary">Adicionar Cartela Automática</button>
-                    <button id="add-card-manual" class="btn secondary">Adicionar Cartela Manual</button>
-                </div>
-                <div class="action-controls">
-                    <button id="draw-random" class="btn accent">Sortear Número</button>
-                    <button id="reset-game" class="btn danger">Reiniciar Jogo</button>
-                </div>
-            </div>
-        </div>
 
-        <div class="drawn-numbers-container">
-            <div class="numbers-header">
-                <h2>Números Sorteados</h2>
-                <select id="numbers-order">
-                    <option value="history">Histórico</option>
-                    <option value="asc">Crescente</option>
-                </select>
-            </div>
-            <div id="drawn-numbers" class="drawn-numbers"></div>
-        </div>
+                <div class="config-stack">
+                    <div class="config-item">
+                        <label for="max-number">Número máximo do sorteio</label>
+                        <div class="input-group">
+                            <input type="number" id="max-number" min="25" max="99" value="75" inputmode="numeric" pattern="[0-9]*">
+                            <button id="confirm-max-number" class="btn secondary" type="button">Confirmar</button>
+                        </div>
+                        <button id="save-config" class="btn primary" type="button">Salvar preferências</button>
+                    </div>
 
-        <div id="cards-container" class="cards-container">
-            <!-- As cartelas de bingo serão adicionadas aqui dinamicamente -->
-        </div>
+                    <div class="config-item">
+                        <label for="bingo-type">Tipo de bingo</label>
+                        <select id="bingo-type">
+                            <option value="line">Horizontal / Vertical / Diagonal</option>
+                            <option value="full">Cartela cheia</option>
+                        </select>
+                    </div>
+
+                    <div class="config-item theme-item">
+                        <label class="theme-label" for="toggle-theme">Tema</label>
+                        <button id="toggle-theme" class="btn tertiary" type="button">Modo Claro</button>
+                    </div>
+                </div>
+
+                <p class="config-info">Alterar o número máximo reinicia o jogo atual.</p>
+            </aside>
+
+            <section class="board-area">
+                <section class="surface controls-panel">
+                    <div class="panel-heading">
+                        <div class="panel-icon" aria-hidden="true">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M4 6H20M4 12H20M4 18H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2>Comandos do jogo</h2>
+                            <p>Registre números, cadastre cartelas e conduza o sorteio.</p>
+                        </div>
+                    </div>
+
+                    <div class="controls">
+                        <div class="primary-controls">
+                            <div class="number-controls">
+                                <input type="number" id="drawn-number" min="1" max="99" placeholder="Número sorteado" inputmode="numeric" pattern="[0-9]*">
+                                <button id="mark-number" class="btn secondary" type="button">Marcar número</button>
+                            </div>
+                        </div>
+
+                        <div class="secondary-controls">
+                            <div class="card-controls">
+                                <input type="text" id="card-id" placeholder="Número da cartela">
+                                <button id="add-card-auto" class="btn primary" type="button">Adicionar cartela automática</button>
+                                <button id="add-card-manual" class="btn tertiary" type="button">Adicionar cartela manual</button>
+                            </div>
+                            <div class="action-controls">
+                                <button id="draw-random" class="btn accent" type="button">Sortear número</button>
+                                <button id="reset-game" class="btn danger" type="button">Reiniciar jogo</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="surface drawn-panel">
+                    <div class="numbers-header">
+                        <div class="panel-heading">
+                            <div class="panel-icon" aria-hidden="true">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h2>Números sorteados</h2>
+                                <p>Acompanhe cada resultado do bingo em tempo real.</p>
+                            </div>
+                        </div>
+                        <select id="numbers-order">
+                            <option value="history">Histórico</option>
+                            <option value="asc">Crescente</option>
+                        </select>
+                    </div>
+                    <div id="drawn-numbers" class="drawn-numbers"></div>
+                </section>
+
+                <section class="surface cards-panel">
+                    <div class="panel-heading">
+                        <div class="panel-icon" aria-hidden="true">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M4 7H20M4 12H12M4 17H8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2>Cartelas em jogo</h2>
+                            <p>Gerencie todas as cartelas ativas e personalize quando precisar.</p>
+                        </div>
+                    </div>
+                    <div id="cards-container" class="cards-container"></div>
+                </section>
+            </section>
+        </main>
     </div>
 
-    <!-- Template para cartela de bingo -->
+    <div class="mobile-config-trigger">
+        <button id="open-config-mobile" class="btn fab icon-only" type="button" aria-label="Alternar tema" title="Alternar tema">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 3V4M12 20V21M4 12H3M6.31412 6.31412L5.5 5.5M17.6859 6.31412L18.5 5.5M6.31412 17.69L5.5 18.5M17.6859 17.69L18.5 18.5M21 12H20M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="sr-only">Alternar tema</span>
+        </button>
+    </div>
+
     <template id="card-template">
         <div class="bingo-card" data-card-id="">
             <div class="card-header">
-                <h3>Cartela #<span class="card-id"></span></h3>
+                <div class="card-meta">
+                    <span class="card-chip">Bingo</span>
+                    <h3>Cartela <span class="card-id"></span></h3>
+                </div>
                 <div class="card-actions">
-                    <button class="btn secondary edit-card">Editar</button>
-                    <button class="btn danger delete-card">Excluir</button>
+                    <button class="btn tertiary edit-card" type="button">Editar</button>
+                    <button class="btn danger delete-card" type="button">Excluir</button>
                 </div>
             </div>
             <div class="card-grid">
@@ -112,7 +190,7 @@
                 <div class="card-row" data-row="2">
                     <div class="card-cell" data-col="0"></div>
                     <div class="card-cell" data-col="1"></div>
-                    <div class="card-cell" data-col="2">FREE</div>
+                    <div class="card-cell free" data-col="2">FREE</div>
                     <div class="card-cell" data-col="3"></div>
                     <div class="card-cell" data-col="4"></div>
                 </div>
@@ -134,139 +212,134 @@
         </div>
     </template>
 
-    <!-- Modal para entrada manual de números da cartela -->
     <div id="manual-card-modal" class="modal hidden">
         <div class="modal-content">
-            <h2 id="manual-card-title">Adicionar Cartela Manual</h2>
-            <p>Informe o ID da cartela e os números para cada posição.</p>
-            
+            <h2 id="manual-card-title">Adicionar cartela manual</h2>
+            <p>Informe o ID da cartela e os números correspondentes a cada posição.</p>
+
             <div class="modal-form">
                 <div class="form-group">
-                    <label for="manual-card-id">ID da Cartela:</label>
+                    <label for="manual-card-id">ID da cartela</label>
                     <input type="text" id="manual-card-id" required>
                 </div>
-                
+
                 <div class="manual-card-grid">
-                    <!-- Cabeçalho BINGO -->
                     <div class="manual-header">B</div>
                     <div class="manual-header">I</div>
                     <div class="manual-header">N</div>
                     <div class="manual-header">G</div>
                     <div class="manual-header">O</div>
-                    
-                    <!-- Inputs para os números -->
-                    <!-- Linha 1 -->
+
                     <input type="number" class="manual-input" data-row="0" data-col="0" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
                     <input type="number" class="manual-input" data-row="0" data-col="1" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
                     <input type="number" class="manual-input" data-row="0" data-col="2" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
                     <input type="number" class="manual-input" data-row="0" data-col="3" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
                     <input type="number" class="manual-input" data-row="0" data-col="4" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
-                    
-                    <!-- Linha 2 -->
+
                     <input type="number" class="manual-input" data-row="1" data-col="0" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
                     <input type="number" class="manual-input" data-row="1" data-col="1" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
                     <input type="number" class="manual-input" data-row="1" data-col="2" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
                     <input type="number" class="manual-input" data-row="1" data-col="3" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
                     <input type="number" class="manual-input" data-row="1" data-col="4" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
-                    
-                    <!-- Linha 3 -->
+
                     <input type="number" class="manual-input" data-row="2" data-col="0" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
                     <input type="number" class="manual-input" data-row="2" data-col="1" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
                     <div class="manual-free">FREE</div>
                     <input type="number" class="manual-input" data-row="2" data-col="3" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
                     <input type="number" class="manual-input" data-row="2" data-col="4" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
-                    
-                    <!-- Linha 4 -->
+
                     <input type="number" class="manual-input" data-row="3" data-col="0" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
                     <input type="number" class="manual-input" data-row="3" data-col="1" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
                     <input type="number" class="manual-input" data-row="3" data-col="2" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
                     <input type="number" class="manual-input" data-row="3" data-col="3" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
                     <input type="number" class="manual-input" data-row="3" data-col="4" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
-                    
-                    <!-- Linha 5 -->
+
                     <input type="number" class="manual-input" data-row="4" data-col="0" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
                     <input type="number" class="manual-input" data-row="4" data-col="1" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
                     <input type="number" class="manual-input" data-row="4" data-col="2" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
                     <input type="number" class="manual-input" data-row="4" data-col="3" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
                     <input type="number" class="manual-input" data-row="4" data-col="4" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
                 </div>
-                
+
                 <div class="modal-buttons">
-                    <button id="save-manual-card" class="btn primary">Salvar Cartela</button>
-                    <button id="cancel-manual-card" class="btn danger">Cancelar</button>
+                    <button id="save-manual-card" class="btn primary" type="button">Salvar cartela</button>
+                    <button id="cancel-manual-card" class="btn danger" type="button">Cancelar</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal de configurações para mobile -->
     <div id="config-modal" class="modal hidden">
         <div class="modal-content">
             <h2>Configurações</h2>
-            
+
             <div class="modal-form">
                 <div class="form-group">
-                    <label for="mobile-max-number">Número máximo do sorteio:</label>
-                    <input type="number" id="mobile-max-number" min="25" max="99" value="75" inputmode="numeric" pattern="[0-9]*">
+                    <label for="mobile-max-number">Número máximo do sorteio</label>
+                    <div class="max-number-controls">
+                        <input type="number" id="mobile-max-number" min="25" max="99" value="75" inputmode="numeric" pattern="[0-9]*">
+                        <button id="mobile-confirm-max-number" class="btn secondary" type="button">Confirmar</button>
+                    </div>
                 </div>
-                
+
                 <div class="form-group">
-                    <label for="mobile-bingo-type">Tipo de Bingo:</label>
+                    <label for="mobile-bingo-type">Tipo de bingo</label>
                     <select id="mobile-bingo-type">
-                        <option value="line">Horizontal/Vertical/Diagonal</option>
-                        <option value="full">Cartela Cheia</option>
+                        <option value="line">Horizontal / Vertical / Diagonal</option>
+                        <option value="full">Cartela cheia</option>
                     </select>
                 </div>
-                
+
                 <div class="form-group">
-                    <button id="mobile-toggle-theme" class="btn secondary">Modo Claro</button>
+                    <label for="mobile-toggle-theme" class="theme-label">Tema</label>
+                    <button id="mobile-toggle-theme" class="btn tertiary" type="button">Modo Claro</button>
                 </div>
-                
+
                 <div class="form-group">
+                    <label for="mobile-card-id">Número da cartela</label>
                     <input type="text" id="mobile-card-id" placeholder="Número da cartela">
                 </div>
-                
+
                 <div class="config-buttons">
-                    <button id="mobile-add-card-auto" class="btn primary">Adicionar Cartela Automática</button>
-                    <button id="mobile-add-card-manual" class="btn secondary">Adicionar Cartela Manual</button>
-                    <button id="mobile-draw-random" class="btn accent">Sortear Número</button>
-                    <button id="mobile-reset-game" class="btn danger">Reiniciar Jogo</button>
+                    <button id="mobile-add-card-auto" class="btn primary" type="button">Adicionar cartela automática</button>
+                    <button id="mobile-add-card-manual" class="btn tertiary" type="button">Adicionar cartela manual</button>
+                    <button id="mobile-draw-random" class="btn accent" type="button">Sortear número</button>
+                    <button id="mobile-reset-game" class="btn danger" type="button">Reiniciar jogo</button>
                 </div>
-                
-                <p class="config-info">Nota: Alterar o número máximo reiniciará o jogo atual.</p>
+
+                <p class="config-info">Alterar o número máximo reinicia o jogo atual.</p>
             </div>
-            
+
             <div class="modal-buttons">
-                <button id="save-mobile-config" class="btn primary">Salvar Configurações</button>
-                <button id="close-config-modal" class="btn secondary">Fechar</button>
+                <button id="save-mobile-config" class="btn primary" type="button">Salvar configurações</button>
+                <button id="close-config-modal" class="btn tertiary" type="button">Fechar</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal de edição de número sorteado -->
     <div id="edit-number-modal" class="modal hidden">
         <div class="modal-content">
-            <h2>Editar Número Sorteado</h2>
-            
+            <h2>Editar número sorteado</h2>
+
             <div class="modal-form">
                 <div class="form-group">
-                    <label for="edit-number-input">Novo número:</label>
+                    <label for="edit-number-input">Novo número</label>
                     <input type="number" id="edit-number-input" min="1" max="99" inputmode="numeric" pattern="[0-9]*">
                 </div>
             </div>
-            
+
             <div class="modal-buttons">
-                <button id="save-edit-number" class="btn primary">Salvar</button>
-                <button id="cancel-edit-number" class="btn secondary">Cancelar</button>
+                <button id="save-edit-number" class="btn primary" type="button">Salvar</button>
+                <button id="cancel-edit-number" class="btn tertiary" type="button">Cancelar</button>
             </div>
         </div>
     </div>
 
     <div id="notification" class="notification hidden">
-        <div class="notification-content">
+        <div class="notification-content surface">
             <h2 id="notification-title"></h2>
             <p id="notification-message"></p>
-            <button id="notification-close" class="btn primary">OK</button>
+            <button id="notification-close" class="btn primary" type="button">Entendi</button>
         </div>
     </div>
 
